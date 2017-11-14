@@ -102,6 +102,10 @@ ENV/
 
 .idea/
 
+#generated files from the tutorial
 city_mobil/*.xml
 city_mobil/*.bat
 city_mobil/*.sumocfg
+
+#generated route file
+ars_junction/data/junction.rou.xml
