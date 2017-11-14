@@ -109,3 +109,6 @@ city_mobil/*.sumocfg
 
 #generated route file
 ars_junction/data/junction.rou.xml
+
+#generated trip file
+ars_junction/tripinfo.xml

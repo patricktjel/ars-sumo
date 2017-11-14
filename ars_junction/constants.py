@@ -22,7 +22,7 @@ import os
 import sys
 
 PREFIX = "junction"
-TIME_STEPS = 3600
+TIME_STEPS = 360
 
 # INFINITY = 1e400
 # DOUBLE_ROWS = 8
