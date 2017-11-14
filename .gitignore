@@ -101,3 +101,7 @@ ENV/
 .mypy_cache/
 
 .idea/
+
+city_mobil/*.xml
+city_mobil/*.bat
+city_mobil/*.sumocfg
