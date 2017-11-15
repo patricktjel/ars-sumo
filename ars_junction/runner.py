@@ -28,6 +28,16 @@ def run():
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
 
+        if VEH_ID in traci.vehicle.getIDList():
+            print(traci.vehicle.getSpeed(VEH_ID))
+
+        # to create a collision:
+        if traci.simulation.getCurrentTime() > 11000:
+            traci.vehicle.setSpeed(VEH_ID, 0)
+            car_to_colide = 'left_0'
+            traci.vehicle.setSpeedMode(car_to_colide, 0)    # disable all safety checks
+            traci.vehicle.setSpeed(car_to_colide, 10)
+
     traci.close()
     sys.stdout.flush()
 

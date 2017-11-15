@@ -22,7 +22,8 @@ import os
 import sys
 
 PREFIX = "junction"
-TIME_STEPS = 360
+TIME_STEPS = 50
+VEH_ID = 'AUTO'
 
 # INFINITY = 1e400
 # DOUBLE_ROWS = 8
