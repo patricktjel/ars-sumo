@@ -26,30 +26,17 @@ def generate_routefile():
         print("""<routes>
         <vType id="car" accel="0.8" decel="4.5" sigma="0.5" length="5" minGap="2.5" maxSpeed="16.67" guiShape="passenger"/>
 
-        <route id="start" edges="4to1" />
-
-        <route id="4to2" edges="4to1 1to2" />
-        <route id="4to3" edges="4to1 1to3" />
-        <route id="4to5" edges="4to1 1to5" />
+        <route id="1to3" edges="1to2 2to3" />
         
-        <route id="2to3" edges="2to1 1to3" />
-        <route id="2to4" edges="2to1 1to4" />
-        <route id="2to5" edges="2to1 1to5" />
-        
-    <vehicle id="AUTO" type="car" route="start" depart="0" color="1,0,0"/>
+    <vehicle id="AUTO" type="car" route="1to3" depart="0" color="1,0,0"/>
         """, file=routes)
 
-        vehNr = 0
-        for i in range(TIME_STEPS):
-            # from 4 to 3 cars every step
-            print('    <vehicle id="left_%i" type="car" route="4to3" depart="%i" />' % (
-                vehNr, i), file=routes)
-            vehNr += 1
-
-            # from 2 to 4 cars every step
-            print('    <vehicle id="down_%i" type="car" route="2to4" depart="%i" />' % (
-                vehNr, i), file=routes)
-            vehNr += 1
+        # vehNr = 0
+        # for i in range(TIME_STEPS):
+        #     # from 4 to 3 cars every step
+        #     print('    <vehicle id="car_%i" type="car" route="1to3" depart="%i" />' % (
+        #         vehNr, i), file=routes)
+        #     vehNr += 1
 
         print("</routes>", file=routes)
 

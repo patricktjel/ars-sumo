@@ -3,8 +3,8 @@
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
-        <net-file value="junction.net.xml"/>
-        <route-files value="junction.rou.xml"/>
+        <net-file value="highway.net.xml"/>
+        <route-files value="highway.rou.xml"/>
     </input>
 
     <time>
