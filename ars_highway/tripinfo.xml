@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 20-11-2017 11:48:45 by SUMO gui Version 0.31.0
+<!-- generated on 20-11-2017 12:14:44 by SUMO gui Version 0.31.0
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
@@ -31,7 +31,7 @@
     </report>
 
     <traci_server>
-        <remote-port value="52075"/>
+        <remote-port value="63795"/>
     </traci_server>
 
     <gui_only>
@@ -44,4 +44,5 @@
 -->
 
 <tripinfos xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/tripinfo_file.xsd">
+    <tripinfo id="AUTO" depart="0.00" departLane="1to2_0" departPos="5.10" departSpeed="0.00" departDelay="0.00" arrival="48.70" arrivalLane="2to3_0" arrivalPos="250.00" arrivalSpeed="12.00" duration="48.70" routeLength="495.00" waitSteps="1" timeLoss="18.93" rerouteNo="0" devices="tripinfo_AUTO" vType="self_car" speedFactor="10.00" vaporized=""/>
 </tripinfos>
