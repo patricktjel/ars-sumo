@@ -7,8 +7,6 @@ from constants import *
 import os
 import sys
 import optparse
-import subprocess
-import random
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 try:
@@ -29,14 +27,15 @@ def run():
         traci.simulationStep()
 
         if VEH_ID in traci.vehicle.getIDList():
+            traci.vehicle.setSpeedMode(VEH_ID, 0)    # disable all safety checks
             print(traci.vehicle.getSpeed(VEH_ID))
 
         # to create a collision:
-        if traci.simulation.getCurrentTime() > 11000:
-            traci.vehicle.setSpeed(VEH_ID, 0)
-            car_to_colide = 'left_0'
-            traci.vehicle.setSpeedMode(car_to_colide, 0)    # disable all safety checks
-            traci.vehicle.setSpeed(car_to_colide, 10)
+        # if traci.simulation.getCurrentTime() > 11000:
+        #     traci.vehicle.setSpeed(VEH_ID, 0)
+        #     car_to_colide = 'left_0'
+        #     traci.vehicle.setSpeedMode(car_to_colide, 0)    # disable all safety checks
+        #     traci.vehicle.setSpeed(car_to_colide, 10)
 
     traci.close()
     sys.stdout.flush()

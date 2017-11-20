@@ -29,25 +29,20 @@ def generate_routefile():
         <route id="start" edges="4to1" />
 
         <route id="4to2" edges="4to1 1to2" />
-        <route id="4to3" edges="4to1 1to3" />
-        <route id="4to5" edges="4to1 1to5" />
+        <route id="3to5" edges="3to1 1to5" />
         
-        <route id="2to3" edges="2to1 1to3" />
-        <route id="2to4" edges="2to1 1to4" />
-        <route id="2to5" edges="2to1 1to5" />
-        
-    <vehicle id="AUTO" type="car" route="start" depart="0" color="1,0,0"/>
+    <vehicle id="AUTO" type="car" route="4to2" depart="0" color="1,0,0"/>
         """, file=routes)
 
         vehNr = 0
         for i in range(TIME_STEPS):
-            # from 4 to 3 cars every step
-            print('    <vehicle id="left_%i" type="car" route="4to3" depart="%i" />' % (
+            # from 4 to 2 cars every step
+            print('    <vehicle id="right_%i" type="car" route="4to2" depart="%i" />' % (
                 vehNr, i), file=routes)
             vehNr += 1
 
-            # from 2 to 4 cars every step
-            print('    <vehicle id="down_%i" type="car" route="2to4" depart="%i" />' % (
+            # from 3 to 5 cars every step
+            print('    <vehicle id="down_%i" type="car" route="3to5" depart="%i" />' % (
                 vehNr, i), file=routes)
             vehNr += 1
 

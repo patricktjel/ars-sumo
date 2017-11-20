@@ -10,12 +10,12 @@
     <time>
         <begin value="0"/>
         <end value="3605"/>
+        <step-length value="1" />
     </time>
 
     <processing>
         <collision.action value="warn" />
         <collision.check-junctions value="true" />
-<!--        <collision.mingap-factor  value="0" />  -->
         <time-to-teleport  value="-1" />
     </processing>
 
@@ -23,8 +23,4 @@
         <no-step-log value="false" />
     </report>
 
-    <gui_only>
-        <quit-on-end value="true" />
-        <start value="true" />
-    </gui_only>
 </configuration>
