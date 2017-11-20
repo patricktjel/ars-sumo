@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 20-11-2017 10:49:28 by SUMO gui Version 0.31.0
+<!-- generated on 20-11-2017 11:48:45 by SUMO gui Version 0.31.0
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
@@ -16,7 +16,8 @@
 
     <time>
         <begin value="0"/>
-        <end value="3605"/>
+        <end value="36050000"/>
+        <step-length value="0.1"/>
     </time>
 
     <processing>
@@ -30,12 +31,13 @@
     </report>
 
     <traci_server>
-        <remote-port value="51715"/>
+        <remote-port value="52075"/>
     </traci_server>
 
     <gui_only>
         <quit-on-end value="true"/>
         <start value="true"/>
+        <tracker-interval value="0.1"/>
     </gui_only>
 
 </configuration>

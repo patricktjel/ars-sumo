@@ -1,8 +1,8 @@
 <routes>
-        <vType id="car" accel="0.8" decel="4.5" sigma="0.5" length="5" minGap="2.5" maxSpeed="16.67" guiShape="passenger"/>
+        <vType id="self_car" accel="0.8" decel="4.5" speedFactor="10" sigma="0.5" length="5" minGap="2.5" maxSpeed="16.67" guiShape="passenger"/>
 
         <route id="1to3" edges="1to2 2to3" />
         
-    <vehicle id="AUTO" type="car" route="1to3" depart="0" color="1,0,0"/>
+    <vehicle id="AUTO" type="self_car" speedFactor="10" route="1to3" depart="0" color="1,0,0"/>
         
 </routes>
