@@ -28,7 +28,7 @@ except ImportError:
 import traci
 
 logger = logging.getLogger(__name__)
-
+log = False
 
 class SumoEnv(gym.Env):
     metadata = {
@@ -40,7 +40,7 @@ class SumoEnv(gym.Env):
         self._seed()
 
         # Speeds in meter per second
-        self.maxSpeed = 70
+        self.maxSpeed = 20
         self.minSpeed = 0
 
         # distances
@@ -53,20 +53,18 @@ class SumoEnv(gym.Env):
         ])
         low = np.array([
             self.minSpeed,
-            self.maxDistance
+            self.minDistance
         ])
 
+        # Observation space of the environment
         self.observation_space = spaces.Box(low, high)
-        self.action_space = spaces.Discrete(3)
+        self.action_space = spaces.Discrete(2)
 
         self._seed()
         self.viewer = None
         self.state = None
 
-        self.steps_beyond_done = None
-
         self.started = False
-
 
     def _seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -74,41 +72,45 @@ class SumoEnv(gym.Env):
 
 
     def _step(self, action):
-        reward = 0
-
-        #if traci.simulation.getCurrentTime() % 10000 == 0:
-            # print(traci.vehicle.getSpeed(VEH_ID))
-            # lane = traci.vehicle.getLaneID(VEH_ID);
-            # print(traci.lane.getMaxSpeed(lane))
+        # apply the given action
         if action == 0:
-            traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) + 2)
+            traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) + 1)
         if action == 1:
-            traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) - 2)
+            traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) - 1)
 
+        # Run a step of the simulation
         traci.simulationStep()
 
+        # Check the result of this step and assign a reward
         if VEH_ID in traci.vehicle.getIDList():
+
             lane = traci.vehicle.getLaneID(VEH_ID)
             if traci.vehicle.getSpeed(VEH_ID) > traci.lane.getMaxSpeed(lane):
                 reward = -10
             else:
-                reward = traci.vehicle.getSpeed(VEH_ID)/traci.lane.getMaxSpeed(lane)
+                reward = (traci.vehicle.getSpeed(VEH_ID)/(traci.lane.getMaxSpeed(lane)) - traci.simulation.getCurrentTime()/10000)
 
             self.state = (traci.vehicle.getSpeed(VEH_ID), traci.vehicle.getDistance(VEH_ID))
+
+            if traci.simulation.getCurrentTime() % 100 == 0 and log:
+                print("%.2f %d %.2f" % (traci.vehicle.getSpeed(VEH_ID), action, reward))
             return np.array(self.state), reward, False, {}
         return np.array(self.state), 0, True, {}
 
     def _reset(self):
         sumoBinary = checkBinary('sumo-gui')
 
+        # close the simulation running before
+        # todo see if this can be changed
         if self.started:
             traci.close()
-        traci.start([sumoBinary, "-c", "data/highway.sumocfg",
-                     "--tripinfo-output", "tripinfo.xml"])
+
+        # Start the next simulation
+        traci.start([sumoBinary, "-c", "data/highway.sumocfg"])
         traci.simulationStep()
         traci.vehicle.setSpeed(VEH_ID, 0)
         self.started = True
 
-        self.state = self.np_random.uniform(low=-0.05, high=0.05, size=(2,))
-        self.steps_beyond_done = None
+        self.state = self.np_random.uniform(low=0, high=20, size=(2,))
+
         return np.array(self.state)
