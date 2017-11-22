@@ -9,6 +9,7 @@ import numpy as np
 from gym import spaces
 from gym.utils import seeding
 from constants import *
+from random import randint
 
 import os
 import sys
@@ -34,7 +35,6 @@ if gui:
 else:
     sumoBinary = checkBinary('sumo')
 config_path = "../data/highway.sumocfg"
-
 
 
 class SumoEnv(gym.Env):
@@ -83,9 +83,9 @@ class SumoEnv(gym.Env):
         if VEH_ID in traci.vehicle.getIDList():
             # apply the given action
             if action == 0:
-                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) + 0.08)
+                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) + 1)
             if action == 1:
-                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) - 0.08)
+                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) - 1)
 
         # Run a step of the simulation
         traci.simulationStep()
@@ -101,7 +101,7 @@ class SumoEnv(gym.Env):
             self.state = (traci.vehicle.getSpeed(VEH_ID), traci.vehicle.getDistance(VEH_ID))
 
             if self.log:
-                print("%.2f %d %.2f" % (traci.vehicle.getSpeed(VEH_ID), action, reward))
+                print("%f %.2f %d %.2f" % (traci.simulation.getCurrentTime()/1000, traci.vehicle.getSpeed(VEH_ID), action, reward))
                 if self.test:
                     self.run.append(traci.vehicle.getSpeed(VEH_ID))
             return np.array(self.state), reward, False, {}
@@ -118,13 +118,15 @@ class SumoEnv(gym.Env):
 
         # Start the next simulation
 
-        speed = self.np_random.uniform(low=0, high=10)
         traci.simulationStep()
+
+        speed = randint(1,8)
         traci.vehicle.setSpeed(VEH_ID, speed)
         traci.vehicle.setSpeedMode(VEH_ID, 0)
 
         self.state = (speed, 0)
 
         return np.array(self.state)
+
 
 traci.start([sumoBinary, "-c", config_path])
