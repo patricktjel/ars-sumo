@@ -50,17 +50,11 @@ class SumoEnv(gym.Env):
         self.maxSpeed = 20
         self.minSpeed = 0
 
-        # distances
-        self.minDistance = 0
-        self.maxDistance = 500
-
         high = np.array([
-            self.maxSpeed,
-            self.maxDistance
+            self.maxSpeed
         ])
         low = np.array([
-            self.minSpeed,
-            self.minDistance
+            self.minSpeed
         ])
 
         # Observation space of the environment
@@ -76,7 +70,7 @@ class SumoEnv(gym.Env):
         self.test = False
 
     def _seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
+        self.np_random, seed = seeding.np_random(123)
         return [seed]
 
     def _step(self, action):
@@ -94,14 +88,14 @@ class SumoEnv(gym.Env):
         if VEH_ID in traci.vehicle.getIDList():
             lane = traci.vehicle.getLaneID(VEH_ID)
             if traci.vehicle.getSpeed(VEH_ID) > traci.lane.getMaxSpeed(lane):
-                reward = -10
+                reward = -10 * (traci.vehicle.getSpeed(VEH_ID) - traci.lane.getMaxSpeed(lane))
             else:
                 reward = traci.vehicle.getSpeed(VEH_ID) ** 2 - 1
 
-            self.state = (traci.vehicle.getSpeed(VEH_ID), traci.vehicle.getDistance(VEH_ID))
+            self.state = (traci.vehicle.getSpeed(VEH_ID))
 
             if self.log:
-                print("%f %.2f %d %.2f" % (traci.simulation.getCurrentTime()/1000, traci.vehicle.getSpeed(VEH_ID), action, reward))
+                print("%f %.2f %d %.2f" % (traci.simulation.getCurrentTime()/100, traci.vehicle.getSpeed(VEH_ID), action, reward))
                 if self.test:
                     self.run.append(traci.vehicle.getSpeed(VEH_ID))
             return np.array(self.state), reward, False, {}
@@ -124,7 +118,7 @@ class SumoEnv(gym.Env):
         traci.vehicle.setSpeed(VEH_ID, speed)
         traci.vehicle.setSpeedMode(VEH_ID, 0)
 
-        self.state = (speed, 0)
+        self.state = (speed)
 
         return np.array(self.state)
 

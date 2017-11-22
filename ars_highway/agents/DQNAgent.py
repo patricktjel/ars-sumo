@@ -4,14 +4,15 @@ import gym
 import numpy as np
 from collections import deque
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Flatten, Activation
 from keras.optimizers import Adam
 import environment
 import matplotlib.pyplot as plt
 
 EPISODES = 1000
 BATCH_SIZE = 32
-MAX_STEPS = 32
+MAX_STEPS = 100
+
 
 class DQNAgent:
     def __init__(self, state_size, action_size):
