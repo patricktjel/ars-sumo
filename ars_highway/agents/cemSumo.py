@@ -51,7 +51,7 @@ cem.compile()
 # slows down training quite a lot. You can always safely abort the training prematurely using
 # Ctrl + C.
 env.log = False
-cem.fit(env, nb_steps=1000000, visualize=False, verbose=2)
+cem.fit(env, nb_steps=100000, visualize=False, verbose=2)
 
 # After training is done, we save the best weights.
 #cem.save_weights('cem_{}_params.h5f'.format(ENV_NAME), overwrite=True)

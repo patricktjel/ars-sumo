@@ -36,6 +36,7 @@ else:
 config_path = "../data/highway.sumocfg"
 
 
+
 class SumoEnv(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
@@ -64,12 +65,15 @@ class SumoEnv(gym.Env):
 
         # Observation space of the environment
         self.observation_space = spaces.Box(low, high)
-        self.action_space = spaces.Discrete(2)
+        self.action_space = spaces.Discrete(3)
 
         self._seed()
         self.viewer = None
         self.state = None
         self.log = False
+        self.result = []
+        self.run = []
+        self.test = False
 
     def _seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -79,9 +83,9 @@ class SumoEnv(gym.Env):
         if VEH_ID in traci.vehicle.getIDList():
             # apply the given action
             if action == 0:
-                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) + 1)
+                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) + 0.08)
             if action == 1:
-                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) - 1)
+                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) - 0.08)
 
         # Run a step of the simulation
         traci.simulationStep()
@@ -92,29 +96,35 @@ class SumoEnv(gym.Env):
             if traci.vehicle.getSpeed(VEH_ID) > traci.lane.getMaxSpeed(lane):
                 reward = -10
             else:
-                reward = traci.vehicle.getSpeed(VEH_ID) ** 2
+                reward = traci.vehicle.getSpeed(VEH_ID) ** 2 - 1
 
             self.state = (traci.vehicle.getSpeed(VEH_ID), traci.vehicle.getDistance(VEH_ID))
 
             if self.log:
                 print("%.2f %d %.2f" % (traci.vehicle.getSpeed(VEH_ID), action, reward))
+                if self.test:
+                    self.run.append(traci.vehicle.getSpeed(VEH_ID))
             return np.array(self.state), reward, False, {}
         return np.array(self.state), 0, True, {}
 
     def _reset(self):
+        if self.test and len(self.run) != 0:
+            self.result.append(list(self.run))
+            self.run.clear()
+
         # close the simulation running before
         # todo see if this can be changed
         traci.load(["-c", config_path])
 
         # Start the next simulation
 
+        speed = self.np_random.uniform(low=0, high=10)
         traci.simulationStep()
-        traci.vehicle.setSpeed(VEH_ID, 0)
+        traci.vehicle.setSpeed(VEH_ID, speed)
         traci.vehicle.setSpeedMode(VEH_ID, 0)
 
-        self.state = self.np_random.uniform(low=0, high=20, size=(2,))
+        self.state = (speed, 0)
 
         return np.array(self.state)
-
 
 traci.start([sumoBinary, "-c", config_path])
