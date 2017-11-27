@@ -27,14 +27,17 @@ def run():
         traci.simulationStep()
 
         if VEH_ID in traci.vehicle.getIDList():
-            traci.vehicle.setSpeedMode(VEH_ID, 0)    # disable all safety checks
+            traci.vehicle.setSpeedMode(VEH_ID, 0)    # disable simulated car safety checks
             print(traci.vehicle.getSpeed(VEH_ID))
+
+        #In order to create a collision create 2 vehicles in the routes file which colide given their starting point and speed. All safety checks are being disabled in this code.
+        traci.vehicle.setSpeedMode('down_1', 0)
 
         # to create a collision:
         # if traci.simulation.getCurrentTime() > 11000:
         #     traci.vehicle.setSpeed(VEH_ID, 0)
-        #     car_to_colide = 'left_0'
-        #     traci.vehicle.setSpeedMode(car_to_colide, 0)    # disable all safety checks
+        #     car_to_colide = 'right_0'
+        #     traci.vehicle.setSpeedMode(car_to_colide, 0)    # disable other car safety checks
         #     traci.vehicle.setSpeed(car_to_colide, 10)
 
     traci.close()

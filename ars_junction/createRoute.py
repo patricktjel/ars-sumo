@@ -4,6 +4,7 @@ Script to generate the rou.xml file in the data folder.
 """
 from __future__ import absolute_import
 from __future__ import print_function
+from VehicleType import VehicleType
 
 import random
 from constants import *
@@ -22,15 +23,13 @@ except ImportError:
 
 # method to generate routes file.
 def generate_routefile():
+    vtype = VehicleType("car")
     with open("data/%s.rou.xml" % PREFIX, "w") as routes:
         print("""<routes>
-        <vType id="car" accel="0.8" decel="4.5" sigma="0.5" length="5" minGap="2.5" maxSpeed="16.67" guiShape="passenger"/>
-
+        """,vtype.printXML(),""""
         <route id="start" edges="4to1" />
-
         <route id="4to2" edges="4to1 1to2" />
         <route id="3to5" edges="3to1 1to5" />
-        
     <vehicle id="AUTO" type="car" route="4to2" depart="0" color="1,0,0"/>
         """, file=routes)
 
@@ -50,5 +49,5 @@ def generate_routefile():
 
 
 # this is the main entry point of this script
-if __name__ == "__main__":
-    generate_routefile()
+#if __name__ == "__main__":
+generate_routefile()
