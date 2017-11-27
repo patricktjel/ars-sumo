@@ -77,9 +77,9 @@ class SumoEnv(gym.Env):
         if VEH_ID in traci.vehicle.getIDList():
             # apply the given action
             if action == 0:
-                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) + 1)
+                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) + 0.25)
             if action == 1:
-                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) - 1)
+                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) - 0.25)
 
         # Run a step of the simulation
         traci.simulationStep()
@@ -87,17 +87,20 @@ class SumoEnv(gym.Env):
         # Check the result of this step and assign a reward
         if VEH_ID in traci.vehicle.getIDList():
             lane = traci.vehicle.getLaneID(VEH_ID)
-            if traci.vehicle.getSpeed(VEH_ID) > traci.lane.getMaxSpeed(lane):
-                reward = -10 * (traci.vehicle.getSpeed(VEH_ID) - traci.lane.getMaxSpeed(lane))
-            else:
-                reward = traci.vehicle.getSpeed(VEH_ID) ** 2 - 1
+            maxLaneSpeed = traci.lane.getMaxSpeed(lane)
+            speed = traci.vehicle.getSpeed(VEH_ID)
 
-            self.state = (traci.vehicle.getSpeed(VEH_ID))
+            if speed > maxLaneSpeed:
+                reward = -10 * (speed - maxLaneSpeed)
+            else:
+                reward = speed ** 2
+
+            self.state = speed
 
             if self.log:
-                print("%f %.2f %d %.2f" % (traci.simulation.getCurrentTime()/100, traci.vehicle.getSpeed(VEH_ID), action, reward))
+                print("%d %.2f %d %.2f" % (traci.simulation.getCurrentTime()/100, speed, action, reward))
                 if self.test:
-                    self.run.append(traci.vehicle.getSpeed(VEH_ID))
+                    self.run.append(speed)
             return np.array(self.state), reward, False, {}
         return np.array(self.state), 0, True, {}
 
@@ -115,8 +118,10 @@ class SumoEnv(gym.Env):
         traci.simulationStep()
 
         speed = randint(1,8)
-        traci.vehicle.setSpeed(VEH_ID, speed)
         traci.vehicle.setSpeedMode(VEH_ID, 0)
+        traci.vehicle.setSpeed(VEH_ID, speed)
+
+        traci.simulationStep()
 
         self.state = (speed)
 

@@ -9,7 +9,7 @@ from keras.optimizers import Adam
 import environment
 import matplotlib.pyplot as plt
 
-EPISODES = 1000
+EPISODES = 10000
 BATCH_SIZE = 32
 MAX_STEPS = 100
 
@@ -22,7 +22,7 @@ class DQNAgent:
         self.gamma = 0.8  # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
-        self.epsilon_decay = 0.990
+        self.epsilon_decay = 0.999
         self.learning_rate = 0.001
         self.model = self._build_model()
 
@@ -111,3 +111,5 @@ if __name__ == "__main__":
     plt.ylabel('Speed (m/s)')
 
     plt.show()
+
+    agent.save('model')
