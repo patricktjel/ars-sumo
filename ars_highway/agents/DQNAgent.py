@@ -9,6 +9,11 @@ from keras.optimizers import Adam
 import environment
 import matplotlib.pyplot as plt
 
+""""
+Based on the tutorial of 
+@url{https://keon.io/deep-q-learning/}
+"""
+
 EPISODES = 10000
 BATCH_SIZE = 32
 MAX_STEPS = 100
