@@ -30,6 +30,7 @@ except ImportError:
         "please declare environment variable 'SUMO_HOME' as the root directory of your sumo installation (it should contain folders 'bin', 'tools' and 'docs')")
 
 import traci
+from traci.constants import *
 
 logger = logging.getLogger(__name__)
 
@@ -73,33 +74,31 @@ class SumoEnv(gym.Env):
         self.test = False
 
     def _step(self, action):
-        if VEH_ID in traci.vehicle.getIDList():
+        before_step = traci.vehicle.getSubscriptionResults()
+        if VEH_ID in before_step:
             # apply the given action
             if action == 0:
-                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) + 0.25)
+                traci.vehicle.setSpeed(VEH_ID, before_step[VEH_ID][VAR_SPEED] + 0.25)
             if action == 2:
-                traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) - 0.25)
+                traci.vehicle.setSpeed(VEH_ID, before_step[VEH_ID][VAR_SPEED] - 0.25)
 
         # Run a step of the simulation
         traci.simulationStep()
 
+        after_step = traci.vehicle.getSubscriptionResults()
         # Check the result of this step and assign a reward
-        if VEH_ID in traci.vehicle.getIDList():
-            lane = traci.vehicle.getLaneID(VEH_ID)
-            maxLaneSpeed = traci.lane.getMaxSpeed(lane)
-            speed = traci.vehicle.getSpeed(VEH_ID)
-
-            if speed > maxLaneSpeed:
-                reward = -10 * (speed - maxLaneSpeed)
+        if VEH_ID in after_step:
+            if after_step[VEH_ID][VAR_SPEED] > MAX_LANE_SPEED:
+                reward = -10 * (after_step[VEH_ID][VAR_SPEED] - MAX_LANE_SPEED)
             else:
-                reward = speed ** 2
+                reward = after_step[VEH_ID][VAR_SPEED] ** 2
 
-            self.state = speed
+            self.state = after_step[VEH_ID][VAR_SPEED]
 
             if self.log:
-                print("%d %.2f %d %.2f" % (traci.simulation.getCurrentTime() / 100, speed, action, reward))
+                print("%.2f %d %.2f" % (after_step[VEH_ID][VAR_SPEED], action, reward))
                 if self.test:
-                    self.run.append(speed)
+                    self.run.append(after_step[VEH_ID][VAR_SPEED])
             return np.array(self.state), reward, False, {}
         return np.array(self.state), 0, True, {}
 
@@ -117,6 +116,9 @@ class SumoEnv(gym.Env):
         traci.vehicle.setSpeed(VEH_ID, speed)
 
         traci.simulationStep()
+
+        # subscribe the vehicles to get their data.
+        traci.vehicle.subscribe(VEH_ID, [VAR_SPEED])
 
         self.state = speed
         return np.array(self.state)
