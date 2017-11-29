@@ -43,14 +43,8 @@ config_path = "../data/highway.sumocfg"
 
 
 class SumoEnv(gym.Env):
-    metadata = {
-        'render.modes': ['human', 'rgb_array'],
-        'video.frames_per_second': 50
-    }
 
     def __init__(self):
-        self._seed()
-
         # Speeds in meter per second
         self.maxSpeed = 20
         self.minSpeed = 0
@@ -88,10 +82,13 @@ class SumoEnv(gym.Env):
         after_step = traci.vehicle.getSubscriptionResults()
         # Check the result of this step and assign a reward
         if VEH_ID in after_step:
-            if after_step[VEH_ID][VAR_SPEED] > MAX_LANE_SPEED:
+            if after_step[VEH_ID][VAR_SPEED] > MAX_LANE_SPEED + 1:
                 reward = -10 * (after_step[VEH_ID][VAR_SPEED] - MAX_LANE_SPEED)
             else:
-                reward = after_step[VEH_ID][VAR_SPEED] ** 2
+                if after_step[VEH_ID][VAR_SPEED] > MAX_LANE_SPEED:
+                    reward = 9 ** 2
+                else:
+                    reward = after_step[VEH_ID][VAR_SPEED] ** 2
 
             self.state = after_step[VEH_ID][VAR_SPEED]
 
