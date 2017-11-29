@@ -93,7 +93,6 @@ def trainOrTest(env, state_size, agent, batch_size, episodes, training):
         for a in range(MAX_STEPS):
             action = agent.act(state, use_epsilon=training)
             next_state, reward, done, _ = env.step(action)
-            reward = reward if not done else -10
             next_state = np.reshape(next_state, [1, state_size])
             agent.remember(e, state, action, reward, next_state, done)
             state = next_state
@@ -101,9 +100,22 @@ def trainOrTest(env, state_size, agent, batch_size, episodes, training):
                 break
         total_reward = sum([x[3] for x in agent.memory if x[0] == e])
         print("episode: {}/{}, total reward:: {}, e: {:.2}"
-              .format(e, episodes, total_reward, agent.epsilon))
+              .format(e+1, episodes, total_reward, agent.epsilon))
         if len(agent.memory) > batch_size and training:
             agent.replay(batch_size)
+
+def plotResults(env):
+    # plot the results.
+    env.reset()
+    leg = []
+    for i, episode in enumerate(env.result):
+        plt.plot(episode)
+        leg.append('episode %d' % (i+1))
+
+    plt.legend(leg, loc='upper left')
+    plt.xlabel('Time (0.1s/step)')
+    plt.ylabel('Speed (m/s)')
+    plt.show()
 
 
 if __name__ == "__main__":
@@ -111,7 +123,6 @@ if __name__ == "__main__":
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
     agent = DQNAgent(state_size, action_size)
-    done = False
 
     env.log = False
     trainOrTest(env, state_size, agent, BATCH_SIZE, EPISODES, training=True)
@@ -120,20 +131,9 @@ if __name__ == "__main__":
     env.test = True
     trainOrTest(env, state_size, agent, BATCH_SIZE, episodes=5, training=False)
 
-    # plot the results.
-    env.reset()
-    leg = []
-    i = 0
-    for episode in env.result:
-        plt.plot(episode)
-        leg.append('episode %d' % i)
-        i += 1
-
-    plt.legend(leg, loc='upper left')
-    plt.xlabel('Time (0.1s/step)')
-    plt.ylabel('Speed (m/s)')
-
-    plt.show()
+    plotResults(env)
 
     agent.save('model')
-    plot_model(agent.model, to_file='model.png')
+    plot_model(agent.model, show_shapes=True)
+
+    env.close()

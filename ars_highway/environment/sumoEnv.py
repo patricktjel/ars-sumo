@@ -127,5 +127,8 @@ class SumoEnv(gym.Env):
 
         return np.array(self.state)
 
+    def close(self):
+        traci.close()
+
 
 traci.start([sumoBinary, "-c", config_path])
