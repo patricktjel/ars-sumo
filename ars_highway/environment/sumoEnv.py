@@ -7,12 +7,16 @@ import constants
 import gym
 import numpy as np
 from gym import spaces
-from gym.utils import seeding
 from constants import *
-from random import randint
+import random as rn
 
 import os
 import sys
+
+#Setting the seeds to get reproducible results
+os.environ['PYTHONHASHSEED'] = '0'
+np.random.seed(42)
+rn.seed(12345)
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 try:
@@ -61,7 +65,6 @@ class SumoEnv(gym.Env):
         self.observation_space = spaces.Box(low, high)
         self.action_space = spaces.Discrete(3)
 
-        self._seed()
         self.viewer = None
         self.state = None
         self.log = False
@@ -69,16 +72,13 @@ class SumoEnv(gym.Env):
         self.run = []
         self.test = False
 
-    def _seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(123)
-        return [seed]
 
     def _step(self, action):
         if VEH_ID in traci.vehicle.getIDList():
             # apply the given action
             if action == 0:
                 traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) + 0.25)
-            if action == 1:
+            if action == 2:
                 traci.vehicle.setSpeed(VEH_ID, traci.vehicle.getSpeed(VEH_ID) - 0.25)
 
         # Run a step of the simulation
@@ -117,7 +117,7 @@ class SumoEnv(gym.Env):
 
         traci.simulationStep()
 
-        speed = randint(1,8)
+        speed = rn.randint(1,8)
         traci.vehicle.setSpeedMode(VEH_ID, 0)
         traci.vehicle.setSpeed(VEH_ID, speed)
 

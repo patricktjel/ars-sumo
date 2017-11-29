@@ -1,22 +1,40 @@
 # -*- coding: utf-8 -*-
-import random
 import gym
 import numpy as np
 from collections import deque
+from keras import backend as K
 from keras.models import Sequential
-from keras.layers import Dense, Flatten, Activation
+from keras.layers import Dense
 from keras.optimizers import Adam
+from keras.utils import plot_model
+
 import environment
 import matplotlib.pyplot as plt
+import tensorflow as tf
+import random as rn
+import os
 
 """"
-Based on the tutorial of 
+File is based on the tutorial of 
 @url{https://keon.io/deep-q-learning/}
 """
 
-EPISODES = 10000
-BATCH_SIZE = 32
-MAX_STEPS = 100
+#constant values
+EPISODES    = 10000
+BATCH_SIZE  = 32
+MAX_STEPS   = 100
+
+
+#Setting the seeds to get reproducible results (https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development)
+os.environ['PYTHONHASHSEED'] = '0'
+os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
+np.random.seed(42)
+rn.seed(12345)
+
+session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+tf.set_random_seed(1234)
+sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+K.set_session(sess)
 
 
 class DQNAgent:
@@ -45,12 +63,12 @@ class DQNAgent:
 
     def act(self, state, use_epsilon=True):
         if np.random.rand() <= self.epsilon and use_epsilon:
-            return random.randrange(self.action_size)
+            return rn.randrange(self.action_size)
         act_values = self.model.predict(state)
         return np.argmax(act_values[0])  # returns action
 
     def replay(self, batch_size):
-        minibatch = random.sample(self.memory, batch_size)
+        minibatch = rn.sample(self.memory, batch_size)
         for _, state, action, reward, next_state, done in minibatch:
             target = reward
             if not done:
@@ -118,3 +136,4 @@ if __name__ == "__main__":
     plt.show()
 
     agent.save('model')
+    plot_model(agent.model, to_file='model.png')
