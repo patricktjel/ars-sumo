@@ -13,7 +13,7 @@ import random as rn
 import os
 import sys
 
-#Setting the seeds to get reproducible results
+# Setting the seeds to get reproducible results
 os.environ['PYTHONHASHSEED'] = '0'
 np.random.seed(42)
 rn.seed(12345)
@@ -72,7 +72,6 @@ class SumoEnv(gym.Env):
         self.run = []
         self.test = False
 
-
     def _step(self, action):
         if VEH_ID in traci.vehicle.getIDList():
             # apply the given action
@@ -98,7 +97,7 @@ class SumoEnv(gym.Env):
             self.state = speed
 
             if self.log:
-                print("%d %.2f %d %.2f" % (traci.simulation.getCurrentTime()/100, speed, action, reward))
+                print("%d %.2f %d %.2f" % (traci.simulation.getCurrentTime() / 100, speed, action, reward))
                 if self.test:
                     self.run.append(speed)
             return np.array(self.state), reward, False, {}
@@ -109,22 +108,17 @@ class SumoEnv(gym.Env):
             self.result.append(list(self.run))
             self.run.clear()
 
-        # close the simulation running before
-        # todo see if this can be changed
         traci.load(["-c", config_path])
-
-        # Start the next simulation
-
         traci.simulationStep()
 
-        speed = rn.randint(1,8)
+        # Setup environment
+        speed = rn.randint(1, 8)
         traci.vehicle.setSpeedMode(VEH_ID, 0)
         traci.vehicle.setSpeed(VEH_ID, speed)
 
         traci.simulationStep()
 
-        self.state = (speed)
-
+        self.state = speed
         return np.array(self.state)
 
     def close(self):

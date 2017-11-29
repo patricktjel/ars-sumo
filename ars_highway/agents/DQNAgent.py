@@ -19,18 +19,18 @@ File is based on the tutorial of
 @url{https://keon.io/deep-q-learning/}
 """
 
-#constant values
-EPISODES    = 10000
+# constant values
+EPISODES    = 10
 BATCH_SIZE  = 32
 MAX_STEPS   = 100
 
 
-#Setting the seeds to get reproducible results (https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development)
+# Setting the seeds to get reproducible results
+# https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development
 os.environ['PYTHONHASHSEED'] = '0'
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 np.random.seed(42)
 rn.seed(12345)
-
 session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
 tf.set_random_seed(1234)
 sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
@@ -38,7 +38,7 @@ K.set_session(sess)
 
 
 class DQNAgent:
-    def __init__(self, state_size, action_size):
+    def __init__(self):
         self.state_size = state_size
         self.action_size = action_size
         self.memory = deque(maxlen=2000)
@@ -86,11 +86,15 @@ class DQNAgent:
         self.model.save_weights(name)
 
 
-def trainOrTest(env, state_size, agent, batch_size, episodes, training):
+def trainOrTest(batch_size, episodes, training):
     for e in range(episodes):
+
+        # reset the env for a new episode
         state = env.reset()
         state = np.reshape(state, [1, state_size])
-        for a in range(MAX_STEPS):
+
+        # Step through the episode until MAX_STEPS is reached
+        for _ in range(MAX_STEPS):
             action = agent.act(state, use_epsilon=training)
             next_state, reward, done, _ = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
@@ -98,14 +102,18 @@ def trainOrTest(env, state_size, agent, batch_size, episodes, training):
             state = next_state
             if done:
                 break
+
+        # print statistics of this episode
         total_reward = sum([x[3] for x in agent.memory if x[0] == e])
         print("episode: {}/{}, total reward:: {}, e: {:.2}"
               .format(e+1, episodes, total_reward, agent.epsilon))
+
+        # Start experience replay if the agent.memory > batch_size
         if len(agent.memory) > batch_size and training:
             agent.replay(batch_size)
 
-def plotResults(env):
-    # plot the results.
+
+def plotResults():
     env.reset()
     leg = []
     for i, episode in enumerate(env.result):
@@ -122,16 +130,17 @@ if __name__ == "__main__":
     env = gym.make('SumoEnv-v0')
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
-    agent = DQNAgent(state_size, action_size)
+    agent = DQNAgent()
 
     env.log = False
-    trainOrTest(env, state_size, agent, BATCH_SIZE, EPISODES, training=True)
+    env.test = False
+    trainOrTest(BATCH_SIZE, EPISODES, training=True)
 
     env.log = True
     env.test = True
-    trainOrTest(env, state_size, agent, BATCH_SIZE, episodes=5, training=False)
+    trainOrTest(BATCH_SIZE, episodes=5, training=False)
 
-    plotResults(env)
+    plotResults()
 
     agent.save('model')
     plot_model(agent.model, show_shapes=True)
