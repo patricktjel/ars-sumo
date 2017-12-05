@@ -16,16 +16,16 @@
     <processing>
         <collision.action value="warn" />
         <collision.check-junctions value="true" />
-<!--        <collision.mingap-factor  value="0" />  -->
         <time-to-teleport  value="-1" />
     </processing>
 
     <report>
-        <no-step-log value="false" />
+        <no-step-log value="true" />  <!-- step log is refreshed many times, this will speed up the simulation -->
     </report>
 
     <gui_only>
         <quit-on-end value="true" />
         <start value="true" />
     </gui_only>
+
 </configuration>

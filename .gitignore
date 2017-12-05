@@ -112,3 +112,8 @@ ars_junction/data/junction.rou.xml
 
 #generated trip file
 ars_junction/tripinfo.xml
+
+ars_highway/agents/model
+ars_highway/agents/model.png
+ars_junction/agents/model
+ars_junction/agents/model.png
