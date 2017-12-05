@@ -82,15 +82,11 @@ class SumoEnv(gym.Env):
         after_step = traci.vehicle.getSubscriptionResults()
         # Check the result of this step and assign a reward
         if VEH_ID in after_step:
-            if after_step[VEH_ID][VAR_SPEED] > MAX_LANE_SPEED + 1:
-                reward = -10 * (after_step[VEH_ID][VAR_SPEED] - MAX_LANE_SPEED)
-            else:
-                if after_step[VEH_ID][VAR_SPEED] > MAX_LANE_SPEED:
-                    reward = 9 ** 2
-                else:
-                    reward = after_step[VEH_ID][VAR_SPEED] ** 2
+            speed = after_step[VEH_ID][VAR_SPEED]
 
-            self.state = after_step[VEH_ID][VAR_SPEED]
+            reward = (-((4 * (speed - MAX_LANE_SPEED)) ** 2)) + MAX_LANE_SPEED
+
+            self.state = speed
 
             if self.log:
                 print("%.2f %d %.2f" % (after_step[VEH_ID][VAR_SPEED], action, reward))
