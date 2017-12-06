@@ -25,23 +25,20 @@ except ImportError:
 # method to generate routes file.
 def generate_routefile():
     vtype = VehicleType.VehicleType("self_car")
-    vehicle = Vehicle.Vehicle(VEH_ID, vtype.id, "4to2")
+    vehicle = Vehicle.Vehicle(VEH_ID, route="4to2", color="1,0,0")
     with open("data/%s.rou.xml" % PREFIX, "w") as routes:
         print("""<routes>
         """, vtype.printXML(), """"
         
-
         <route id="4to2" edges="4to1 1to2" />
+        <route id="5to3" edges="5to1 1to3" />
         """, vehicle.printXML(), """
     
         """, file=routes)
 
-        # vehNr = 0
-        # for i in range(TIME_STEPS):
-        #     # from 4 to 3 cars every step
-        #     print('    <vehicle id="car_%i" type="car" route="1to3" depart="%i" />' % (
-        #         vehNr, i), file=routes)
-        #     vehNr += 1
+        for i in range(TIME_STEPS):
+            vehicle = Vehicle.Vehicle(i, route="5to3")
+            print(vehicle.printXML(), file=routes)
 
         print("</routes>", file=routes)
 

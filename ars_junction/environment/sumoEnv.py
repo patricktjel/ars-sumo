@@ -37,6 +37,7 @@ sumoBinary = checkBinary('sumo-gui') if gui else checkBinary('sumo')
 config_path = "../data/{}.sumocfg".format(PREFIX)
 
 
+# noinspection PyMethodMayBeStatic
 class SumoEnv(gym.Env):
 
     def __init__(self):
@@ -62,7 +63,6 @@ class SumoEnv(gym.Env):
         self.run = []
         self.test = False
 
-    # noinspection PyMethodMayBeStatic
     def getReward(self, data):
         return (-((4 * (data[VEH_ID][VAR_SPEED] - MAX_LANE_SPEED)) ** 2)) + MAX_LANE_SPEED
 

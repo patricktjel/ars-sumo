@@ -106,7 +106,7 @@ def trainOrTest(batch_size, episodes, training):
 
         # print statistics of this episode
         total_reward = sum([x[3] for x in agent.memory if x[0] == e])
-        print("episode: {}/{}, total reward:: {}, e: {:.2}"
+        print("episode: {:d}/{:d}, total reward:: {:.2f}, e: {:.2}"
               .format(e+1, episodes, total_reward, agent.epsilon))
 
         # Start experience replay if the agent.memory > batch_size

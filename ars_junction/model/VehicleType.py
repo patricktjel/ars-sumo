@@ -74,7 +74,7 @@ class VehicleType:
         self.sigma = 0.5
         self.length = 5.0
         self.minGap = 2.5
-        self.maxSpeed = 70.0
+        self.maxSpeed = 15.0
         self.vClass = VClass.PASSENGER
         self.guiShape = GuiShape.PASSENGER
         self.impatience = 0.0
