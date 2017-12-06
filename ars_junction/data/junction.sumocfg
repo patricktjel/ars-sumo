@@ -9,8 +9,8 @@
 
     <time>
         <begin value="0"/>
-        <end value="3605"/>
-        <step-length value="1" />
+        <end value="36050000"/>
+        <step-length value="0.1" />
     </time>
 
     <processing>
@@ -20,7 +20,12 @@
     </processing>
 
     <report>
-        <no-step-log value="false" />
+        <no-step-log value="true" />  <!-- step log is refreshed many times, this will speed up the simulation -->
     </report>
+
+    <gui_only>
+        <quit-on-end value="true" />
+        <start value="true" />
+    </gui_only>
 
 </configuration>

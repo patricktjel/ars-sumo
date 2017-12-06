@@ -24,6 +24,7 @@ import sys
 PREFIX = "junction"
 TIME_STEPS = 50
 VEH_ID = 'AUTO'
+MAX_LANE_SPEED = 10
 
 # INFINITY = 1e400
 # DOUBLE_ROWS = 8

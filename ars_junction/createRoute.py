@@ -4,6 +4,8 @@ Script to generate the rou.xml file in the data folder.
 """
 from __future__ import absolute_import
 from __future__ import print_function
+import model.VehicleType as VehicleType
+import model.Vehicle as Vehicle
 
 import random
 from constants import *
@@ -22,29 +24,24 @@ except ImportError:
 
 # method to generate routes file.
 def generate_routefile():
+    vtype = VehicleType.VehicleType("self_car")
+    vehicle = Vehicle.Vehicle(VEH_ID, vtype.id, "4to2")
     with open("data/%s.rou.xml" % PREFIX, "w") as routes:
         print("""<routes>
-        <vType id="car" accel="0.8" decel="4.5" sigma="0.5" length="5" minGap="2.5" maxSpeed="16.67" guiShape="passenger"/>
-
-        <route id="start" edges="4to1" />
+        """, vtype.printXML(), """"
+        
 
         <route id="4to2" edges="4to1 1to2" />
-        <route id="3to5" edges="3to1 1to5" />
-        
-    <vehicle id="AUTO" type="car" route="4to2" depart="0" color="1,0,0"/>
+        """, vehicle.printXML(), """
+    
         """, file=routes)
 
-        vehNr = 0
-        for i in range(TIME_STEPS):
-            # from 4 to 2 cars every step
-            print('    <vehicle id="right_%i" type="car" route="4to2" depart="%i" />' % (
-                vehNr, i), file=routes)
-            vehNr += 1
-
-            # from 3 to 5 cars every step
-            print('    <vehicle id="down_%i" type="car" route="3to5" depart="%i" />' % (
-                vehNr, i), file=routes)
-            vehNr += 1
+        # vehNr = 0
+        # for i in range(TIME_STEPS):
+        #     # from 4 to 3 cars every step
+        #     print('    <vehicle id="car_%i" type="car" route="1to3" depart="%i" />' % (
+        #         vehNr, i), file=routes)
+        #     vehNr += 1
 
         print("</routes>", file=routes)
 
