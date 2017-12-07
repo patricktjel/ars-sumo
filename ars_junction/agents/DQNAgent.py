@@ -1,18 +1,29 @@
-# -*- coding: utf-8 -*-
-import gym
 import numpy as np
+import random as rn
+import tensorflow as tf
+import os
+# Setting the seeds to get reproducible results
+# https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development
+os.environ['PYTHONHASHSEED'] = '0'
+os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
+np.random.seed(42)
+rn.seed(12345)
+session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+tf.set_random_seed(1234)
+sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+from keras import backend as keras
+keras.set_session(sess)
+
+import gym
 from collections import deque
-from keras import backend as K
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
 from keras.utils import plot_model
+from keras import initializers
 
 import environment
 import matplotlib.pyplot as plt
-import tensorflow as tf
-import random as rn
-import os
 
 """"
 File is based on the tutorial of 
@@ -24,18 +35,6 @@ TRAIN_EPISODES  = 10000
 TEST_EPISODES   = 5
 BATCH_SIZE      = 32
 MAX_STEPS       = 100
-
-
-# Setting the seeds to get reproducible results
-# https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development
-os.environ['PYTHONHASHSEED'] = '0'
-os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
-np.random.seed(42)
-rn.seed(12345)
-session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
-tf.set_random_seed(1234)
-sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
-K.set_session(sess)
 
 
 class DQNAgent:
@@ -50,13 +49,24 @@ class DQNAgent:
         self.learning_rate = 0.001
         self.model = self._build_model()
 
+    # Building neural Net for Deep-Q learning Model
     def _build_model(self):
-        # Neural Net for Deep-Q learning Model
+        # set kernel_initializers: https://stackoverflow.com/questions/45230448/how-to-get-reproducible-result-when-running-keras-with-tensorflow-backend
         model = Sequential()
-        model.add(Dense(24, input_dim=self.state_size, activation='relu'))
-        model.add(Dense(24, activation='relu'))
-        model.add(Dense(self.action_size, activation='linear'))
-        model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
+        model.add(Dense(24, input_dim=self.state_size,
+                        activation='relu',
+                        kernel_initializer=initializers.glorot_normal(seed=1337),
+                        bias_initializer=initializers.Constant(value=0.1)))
+        model.add(Dense(24,
+                        activation='relu',
+                        kernel_initializer=initializers.glorot_normal(seed=1337),
+                        bias_initializer=initializers.Constant(value=0.1)))
+        model.add(Dense(self.action_size,
+                        activation='linear',
+                        kernel_initializer=initializers.glorot_normal(seed=1337),
+                        bias_initializer=initializers.Constant(value=0.1)))
+        model.compile(loss='mse',
+                      optimizer=Adam(lr=self.learning_rate))
         return model
 
     def remember(self, episode, state, action, reward, next_state, done):
@@ -106,7 +116,7 @@ def trainOrTest(batch_size, episodes, training):
 
         # print statistics of this episode
         total_reward = sum([x[3] for x in agent.memory if x[0] == e])
-        print("episode: {:d}/{:d}, total reward:: {:.2f}, e: {:.2}"
+        print("episode: {:d}/{:d}, total reward: {:.2f}, e: {:.2}"
               .format(e+1, episodes, total_reward, agent.epsilon))
 
         # Start experience replay if the agent.memory > batch_size
