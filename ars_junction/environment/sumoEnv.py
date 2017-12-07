@@ -35,12 +35,20 @@ sumoBinary = checkBinary('sumo-gui') if gui else checkBinary('sumo')
 config_path = "../data/{}.sumocfg".format(PREFIX)
 
 
+# The 490 is a magic variable which should  be changed when the road get's longer.
 def detectCollision(traci_data, veh_travelled_distance):
     return VEH_ID not in traci_data and veh_travelled_distance <= 490
 
 
-def getReward(data):
-    return (-((4 * (data[VEH_ID][VAR_SPEED] - MAX_LANE_SPEED)) ** 2)) + MAX_LANE_SPEED
+def speedReward(speed):
+    return -1 * (1 / (MAX_LANE_SPEED / (4 / 5))) * speed ** 5 + speed ** 4
+
+
+def getReward(traci_data):
+    speed = traci_data[VEH_ID][VAR_SPEED]
+    reward = speedReward(speed)
+    reward *= 10/speedReward(MAX_LANE_SPEED)
+    return reward
 
 
 class SumoEnv(gym.Env):
@@ -68,30 +76,38 @@ class SumoEnv(gym.Env):
         self.run = []
         self.test = False
 
-    def _step(self, action):
         # This variable automatically get's updated after traci.simulationStep()
-        traci_data = traci.vehicle.getSubscriptionResults()
+        self.traci_data = traci.vehicle.getSubscriptionResults()
 
-        if VEH_ID in traci_data:
+    # Sets the state to the currently known values
+    def set_state(self):
+        self.state = [self.traci_data[VEH_ID][VAR_SPEED]]
+
+    def _step(self, action):
+        pos = self.traci_data[VEH_ID][VAR_DISTANCE]
+        if VEH_ID in self.traci_data:
             # apply the given action
             if action == 0:
-                traci.vehicle.setSpeed(VEH_ID, traci_data[VEH_ID][VAR_SPEED] + 0.25)
+                traci.vehicle.setSpeed(VEH_ID, self.traci_data[VEH_ID][VAR_SPEED] + 0.25)
             if action == 2:
-                traci.vehicle.setSpeed(VEH_ID, traci_data[VEH_ID][VAR_SPEED] - 0.25)
+                traci.vehicle.setSpeed(VEH_ID, self.traci_data[VEH_ID][VAR_SPEED] - 0.25)
 
         # Run a step of the simulation
         traci.simulationStep()
 
-        # Check the result of this step and assign a reward
-        if VEH_ID in traci_data:
-            reward = getReward(traci_data)
+        if detectCollision(self.traci_data, pos):
+            print("collision detected")
 
-            self.state = traci_data[VEH_ID][VAR_SPEED]
+        # Check the result of this step and assign a reward
+        if VEH_ID in self.traci_data and '0' in self.traci_data:
+            reward = getReward(self.traci_data)
+
+            self.set_state()
 
             if self.log:
-                print("{:.2f} {:d} {:.2f}".format(traci_data[VEH_ID][VAR_SPEED], action, reward))
+                print("{:.2f} {:d} {:.2f}".format(self.traci_data[VEH_ID][VAR_SPEED], action, reward))
             if self.test:
-                self.run.append(traci_data[VEH_ID][VAR_SPEED])
+                self.run.append(self.traci_data[VEH_ID][VAR_SPEED])
             return np.array(self.state), reward, False, {}
         return np.array(self.state), 0, True, {}
 
@@ -111,9 +127,10 @@ class SumoEnv(gym.Env):
         traci.simulationStep()
 
         # subscribe the vehicles to get their data.
-        traci.vehicle.subscribe(VEH_ID, [VAR_SPEED])
+        traci.vehicle.subscribe(VEH_ID, [VAR_SPEED, VAR_DISTANCE])
+        traci.vehicle.subscribe("0", [VAR_SPEED, VAR_DISTANCE])
 
-        self.state = speed
+        self.set_state()
         return np.array(self.state)
 
     def close(self):

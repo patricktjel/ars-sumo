@@ -11,8 +11,6 @@ import sys
 import optparse
 
 # we need to import python modules from the $SUMO_HOME/tools directory
-from environment.sumoEnv import detectCollision
-
 try:
     sys.path.append(os.path.join(os.path.dirname(
         __file__), '..', '..', '..', '..', "tools"))  # tutorial in tests
@@ -24,6 +22,14 @@ except ImportError:
         "please declare environment variable 'SUMO_HOME' as the root directory of your sumo installation (it should contain folders 'bin', 'tools' and 'docs')")
 
 import traci
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+# The 490 is a magic variable which should  be changed when the road get's longer.
+def detectCollision(traci_data, veh_travelled_distance):
+    return VEH_ID not in traci_data and veh_travelled_distance <= 490
 
 
 def run():
@@ -37,7 +43,7 @@ def run():
         pos = traci_data[VEH_ID][VAR_DISTANCE]
         traci.simulationStep()
 
-        #Collision check test
+        # Collision check test
         collision = detectCollision(traci_data, pos)
 
         if VEH_ID in traci.vehicle.getIDList():
