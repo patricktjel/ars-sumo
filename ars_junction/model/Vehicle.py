@@ -8,7 +8,7 @@ from model.VehicleType import VehicleType
 
 class Vehicle:
 
-    def __init__(self, id, route, type=VehicleType("self_car").id, depart=0.0, color="0,0,0"):
+    def __init__(self, id, route, type=VehicleType("self_car").id, depart=0.0, color="1,1,0"):
         self.id = id
         self.type = type
         self.route = route

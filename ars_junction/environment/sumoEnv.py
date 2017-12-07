@@ -1,8 +1,6 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import logging
-
 import constants
 import gym
 import numpy as np
@@ -37,7 +35,14 @@ sumoBinary = checkBinary('sumo-gui') if gui else checkBinary('sumo')
 config_path = "../data/{}.sumocfg".format(PREFIX)
 
 
-# noinspection PyMethodMayBeStatic
+def detectCollision(traci_data, veh_travelled_distance):
+    return VEH_ID not in traci_data and veh_travelled_distance <= 490
+
+
+def getReward(data):
+    return (-((4 * (data[VEH_ID][VAR_SPEED] - MAX_LANE_SPEED)) ** 2)) + MAX_LANE_SPEED
+
+
 class SumoEnv(gym.Env):
 
     def __init__(self):
@@ -63,32 +68,30 @@ class SumoEnv(gym.Env):
         self.run = []
         self.test = False
 
-    def getReward(self, data):
-        return (-((4 * (data[VEH_ID][VAR_SPEED] - MAX_LANE_SPEED)) ** 2)) + MAX_LANE_SPEED
-
     def _step(self, action):
-        before_step = traci.vehicle.getSubscriptionResults()
-        if VEH_ID in before_step:
+        # This variable automatically get's updated after traci.simulationStep()
+        traci_data = traci.vehicle.getSubscriptionResults()
+
+        if VEH_ID in traci_data:
             # apply the given action
             if action == 0:
-                traci.vehicle.setSpeed(VEH_ID, before_step[VEH_ID][VAR_SPEED] + 0.25)
+                traci.vehicle.setSpeed(VEH_ID, traci_data[VEH_ID][VAR_SPEED] + 0.25)
             if action == 2:
-                traci.vehicle.setSpeed(VEH_ID, before_step[VEH_ID][VAR_SPEED] - 0.25)
+                traci.vehicle.setSpeed(VEH_ID, traci_data[VEH_ID][VAR_SPEED] - 0.25)
 
         # Run a step of the simulation
         traci.simulationStep()
 
-        after_step = traci.vehicle.getSubscriptionResults()
         # Check the result of this step and assign a reward
-        if VEH_ID in after_step:
-            reward = self.getReward(after_step)
+        if VEH_ID in traci_data:
+            reward = getReward(traci_data)
 
-            self.state = after_step[VEH_ID][VAR_SPEED]
+            self.state = traci_data[VEH_ID][VAR_SPEED]
 
             if self.log:
-                print("{:.2f} {:d} {:.2f}".format(after_step[VEH_ID][VAR_SPEED], action, reward))
-                if self.test:
-                    self.run.append(after_step[VEH_ID][VAR_SPEED])
+                print("{:.2f} {:d} {:.2f}".format(traci_data[VEH_ID][VAR_SPEED], action, reward))
+            if self.test:
+                self.run.append(traci_data[VEH_ID][VAR_SPEED])
             return np.array(self.state), reward, False, {}
         return np.array(self.state), 0, True, {}
 

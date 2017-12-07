@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+
+from traci.constants import VAR_SPEED, VAR_POSITION, VAR_DISTANCE
 from constants import *
 
 import os
@@ -9,6 +11,8 @@ import sys
 import optparse
 
 # we need to import python modules from the $SUMO_HOME/tools directory
+from environment.sumoEnv import detectCollision
+
 try:
     sys.path.append(os.path.join(os.path.dirname(
         __file__), '..', '..', '..', '..', "tools"))  # tutorial in tests
@@ -23,10 +27,21 @@ import traci
 
 
 def run():
+    traci.vehicle.subscribe(VEH_ID, [VAR_SPEED, VAR_POSITION, VAR_DISTANCE])
+    traci.vehicle.subscribe('0', [VAR_SPEED, VAR_POSITION])
+
+    traci_data = traci.vehicle.getSubscriptionResults()
+    traci.simulationStep()
+
     while traci.simulation.getMinExpectedNumber() > 0:
+        pos = traci_data[VEH_ID][VAR_DISTANCE]
         traci.simulationStep()
 
+        #Collision check test
+        collision = detectCollision(traci_data, pos)
+
         if VEH_ID in traci.vehicle.getIDList():
+            traci.vehicle.setSpeedMode('0', 0)
             traci.vehicle.setSpeedMode(VEH_ID, 0)    # disable all safety checks
             print(traci.vehicle.getSpeed(VEH_ID))
 

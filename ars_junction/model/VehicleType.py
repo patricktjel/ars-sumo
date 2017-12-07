@@ -78,12 +78,12 @@ class VehicleType:
         self.vClass = VClass.PASSENGER
         self.guiShape = GuiShape.PASSENGER
         self.impatience = 0.0
-        self.speedFactor = 10
+        self.speedFactor = 1.0
 
     def printXML(obj):
         xmlString = "<vType"
         for attr in dir(obj):
             if hasattr(obj, attr) and "_" not in attr and not callable(getattr(obj,attr)):
-                xmlString += (" %s=\"%s\"" % (attr, getattr(obj, attr)))
+                xmlString += (" {}=\"{}\"".format(attr, getattr(obj, attr)))
         xmlString += "/>"
         return xmlString
