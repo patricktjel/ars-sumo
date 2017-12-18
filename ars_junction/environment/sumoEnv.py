@@ -5,6 +5,8 @@ import constants
 import gym
 import numpy as np
 from gym import spaces
+
+import createRoute
 from constants import *
 import random as rn
 
@@ -37,7 +39,7 @@ config_path = "../data/{}.sumocfg".format(PREFIX)
 
 # The 490 is a magic variable which should  be changed when the road get's longer.
 def detectCollision(traci_data, veh_travelled_distance):
-    return VEH_ID not in traci_data and veh_travelled_distance <= 490
+    return VEH_ID not in traci_data and veh_travelled_distance <= 90
 
 
 def speedReward(speed):
@@ -79,11 +81,26 @@ class SumoEnv(gym.Env):
         # This variable automatically get's updated after traci.simulationStep()
         self.traci_data = traci.vehicle.getSubscriptionResults()
 
+    # check if it is possible to subscribe the next vehicle
+    def subscribe_vehicles(self):
+        # is the next id legit?
+        if self.next_id_to_subscribe < len(self.created_cars):
+            prev_car = self.created_cars[self.next_id_to_subscribe - 1]
+            # check if the previous car is already in the simulation so that SUMO has read car 'next_id_to_subscribe
+            if prev_car in self.traci_data and self.traci_data[prev_car][VAR_POSITION] > (0, 0):
+                try:
+                    traci.vehicle.subscribe(str(self.next_id_to_subscribe), [VAR_SPEED, VAR_DISTANCE, VAR_POSITION])
+                    self.next_id_to_subscribe += 1
+                except Exception:
+                    pass
+
     # Sets the state to the currently known values
     def set_state(self):
         self.state = [self.traci_data[VEH_ID][VAR_SPEED]]
 
     def _step(self, action):
+        self.subscribe_vehicles()
+
         pos = self.traci_data[VEH_ID][VAR_DISTANCE]
         if VEH_ID in self.traci_data:
             # apply the given action
@@ -99,7 +116,7 @@ class SumoEnv(gym.Env):
             print("collision detected")
 
         # Check the result of this step and assign a reward
-        if VEH_ID in self.traci_data and '0' in self.traci_data:
+        if VEH_ID in self.traci_data:
             reward = getReward(self.traci_data)
 
             self.set_state()
@@ -116,19 +133,19 @@ class SumoEnv(gym.Env):
             self.result.append(list(self.run))
             self.run.clear()
 
+        # generate new traffic situation
+        self.created_cars = createRoute.generate_routefile('../data/junction.rou.xml')
+
         traci.load(["-c", config_path])
         traci.simulationStep()
 
         # Setup environment
-        speed = rn.randint(1, 8)
         traci.vehicle.setSpeedMode(VEH_ID, 0)
-        traci.vehicle.setSpeed(VEH_ID, speed)
+        traci.vehicle.setSpeed(VEH_ID, rn.randint(1, 8))
 
         traci.simulationStep()
-
-        # subscribe the vehicles to get their data.
-        traci.vehicle.subscribe(VEH_ID, [VAR_SPEED, VAR_DISTANCE])
-        traci.vehicle.subscribe("0", [VAR_SPEED, VAR_DISTANCE])
+        traci.vehicle.subscribe(VEH_ID, [VAR_SPEED, VAR_DISTANCE, VAR_POSITION])
+        self.next_id_to_subscribe = 1
 
         self.set_state()
         return np.array(self.state)
@@ -137,4 +154,4 @@ class SumoEnv(gym.Env):
         traci.close()
 
 
-traci.start([sumoBinary, "-c", config_path])
+traci.start([sumoBinary, "-n", "../data/{}.net.xml".format(PREFIX)])

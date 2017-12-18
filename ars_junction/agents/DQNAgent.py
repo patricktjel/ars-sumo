@@ -33,15 +33,16 @@ File is based on the tutorial of
 # constant values
 TRAIN_EPISODES  = 10000
 TEST_EPISODES   = 5
+MEMORY_SIZE     = 2000
 BATCH_SIZE      = 32
-MAX_STEPS       = 100
+MAX_STEPS       = 200
 
 
 class DQNAgent:
     def __init__(self):
         self.state_size = state_size
         self.action_size = action_size
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=MEMORY_SIZE)
         self.gamma = 0.8  # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
@@ -56,15 +57,15 @@ class DQNAgent:
         model.add(Dense(24, input_dim=self.state_size,
                         activation='relu',
                         kernel_initializer=initializers.glorot_normal(seed=1337),
-                        bias_initializer=initializers.Constant(value=0.1)))
+                        bias_initializer=initializers.Constant(value=0)))
         model.add(Dense(24,
                         activation='relu',
                         kernel_initializer=initializers.glorot_normal(seed=1337),
-                        bias_initializer=initializers.Constant(value=0.1)))
+                        bias_initializer=initializers.Constant(value=0)))
         model.add(Dense(self.action_size,
                         activation='linear',
                         kernel_initializer=initializers.glorot_normal(seed=1337),
-                        bias_initializer=initializers.Constant(value=0.1)))
+                        bias_initializer=initializers.Constant(value=0)))
         model.compile(loss='mse',
                       optimizer=Adam(lr=self.learning_rate))
         return model
