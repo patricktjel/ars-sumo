@@ -49,11 +49,15 @@ class SumoEnv(gym.Env):
         self.maxSpeed = 20
         self.minSpeed = 0
 
+        self.minDistance = 0
+        self.maxDistance = 500
         high = np.array([
-            self.maxSpeed
+            self.maxSpeed,
+            self.maxDistance,
         ])
         low = np.array([
-            self.minSpeed
+            self.minSpeed,
+            self.maxDistance
         ])
 
         # Observation space of the environment
@@ -68,32 +72,30 @@ class SumoEnv(gym.Env):
         self.test = False
 
     def _step(self, action):
-        before_step = traci.vehicle.getSubscriptionResults()
-        if VEH_ID in before_step:
+        traci_data = traci.vehicle.getSubscriptionResults()
+        if VEH_ID in traci_data:
             # apply the given action
             if action == 0:
-                traci.vehicle.setSpeed(VEH_ID, before_step[VEH_ID][VAR_SPEED] + 0.25)
+                traci.vehicle.setSpeed(VEH_ID, traci_data[VEH_ID][VAR_SPEED] + 0.25)
             if action == 2:
-                traci.vehicle.setSpeed(VEH_ID, before_step[VEH_ID][VAR_SPEED] - 0.25)
-
+                traci.vehicle.setSpeed(VEH_ID, traci_data[VEH_ID][VAR_SPEED] - 0.25)
         # Run a step of the simulation
         traci.simulationStep()
 
-        after_step = traci.vehicle.getSubscriptionResults()
         # Check the result of this step and assign a reward
-        if VEH_ID in after_step:
-            speed = after_step[VEH_ID][VAR_SPEED]
+        if VEH_ID in traci_data:
+            speed = traci_data[VEH_ID][VAR_SPEED]
+            distance = traci_data[VEH_ID][VAR_LEADER][1]
+            reward = 0.0000001*(-1*(1 / (MAX_LANE_SPEED / (6 / 7))) * speed ** 7 + speed ** 6)
 
-            reward = (-((4 * (speed - MAX_LANE_SPEED)) ** 2)) + MAX_LANE_SPEED
-
-            self.state = speed
+            self.state = (speed, distance)
 
             if self.log:
-                print("%.2f %d %.2f" % (after_step[VEH_ID][VAR_SPEED], action, reward))
-                if self.test:
-                    self.run.append(after_step[VEH_ID][VAR_SPEED])
+                print("%.2f %d %.2f" % (traci_data[VEH_ID][VAR_SPEED], action, reward))
+            if self.test:
+                self.run.append(traci_data[VEH_ID][VAR_SPEED])
             return np.array(self.state), reward, False, {}
-        return np.array(self.state), 0, True, {}
+        return np.array(self.state), -20000, True, {}
 
     def _reset(self):
         if self.test and len(self.run) != 0:
@@ -101,10 +103,11 @@ class SumoEnv(gym.Env):
             self.run.clear()
 
         traci.load(["-c", config_path])
-        traci.simulationStep()
+        for _ in range(21):
+            traci.simulationStep()
 
         # Setup environment
-        speed = rn.randint(1, 8)
+        speed = rn.randint(10, 20)
         traci.vehicle.setSpeedMode(VEH_ID, 0)
         traci.vehicle.setSpeed(VEH_ID, speed)
 
@@ -112,8 +115,8 @@ class SumoEnv(gym.Env):
 
         # subscribe the vehicles to get their data.
         traci.vehicle.subscribe(VEH_ID, [VAR_SPEED])
-
-        self.state = speed
+        traci.vehicle.subscribeLeader(VEH_ID, 500)
+        self.state = (speed, 1000)
         return np.array(self.state)
 
     def close(self):

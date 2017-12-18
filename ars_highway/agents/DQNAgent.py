@@ -33,7 +33,7 @@ File is based on the tutorial of
 # constant values
 EPISODES    = 10000
 BATCH_SIZE  = 32
-MAX_STEPS   = 100
+MAX_STEPS   = 200
 
 
 class DQNAgent:

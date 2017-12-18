@@ -24,7 +24,7 @@ import sys
 PREFIX = "highway"
 TIME_STEPS = 50
 VEH_ID = 'AUTO'
-MAX_LANE_SPEED = 10
+MAX_LANE_SPEED = 30
 
 # INFINITY = 1e400
 # DOUBLE_ROWS = 8
