@@ -85,7 +85,7 @@ class SumoEnv(gym.Env):
         # This variable automatically get's updated after traci.simulationStep()
         # self.traci_data
 
-    # check if it is possible to subscribe the next vehicle
+    # subcribe all possible vehicles
     def subscribe_vehicles(self):
         for veh in traci.vehicle.getIDList():
             if veh not in self.traci_data.keys():
@@ -97,13 +97,19 @@ class SumoEnv(gym.Env):
 
         position_grid = np.zeros(shape=(11, 11))
         car_position = self.traci_data[VEH_ID][VAR_POSITION]
-        for pos in [x[VAR_POSITION] for x in self.traci_data.values()]:
+        for pos, angle in [(x[VAR_POSITION], x[VAR_ANGLE]) for x in self.traci_data.values()]:
             relative_x = pos[0] - car_position[0]
             relative_y = pos[1] - car_position[1]
             x_index = 5 + int(relative_x/5)
-            y_index = 5 + int(relative_y/5)
-            if -5 <= x_index <= 5 and -5 <= y_index <= 5:
-                position_grid[x_index][y_index] = 1
+            y_index = 5 - int(relative_y/5)
+
+            # Make sure that the index doesn't go out of bounds
+            if 0 <= x_index <= 10 and 0 <= y_index <= 10:
+                if (angle == 180 and y_index > 5) or (angle == 0 and y_index < 5):
+                    # Filter out the cars that have passed the junction.
+                    pass
+                else:
+                    position_grid[y_index][x_index] = 1
 
         self.state = np.reshape(np.append([speed], position_grid), (1, self.observation_space.shape[0]))
 
