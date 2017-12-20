@@ -35,7 +35,7 @@ TRAIN_EPISODES  = 10000
 TEST_EPISODES   = 5
 MEMORY_SIZE     = 2000
 BATCH_SIZE      = 32
-MAX_STEPS       = 200
+MAX_STEPS       = 400
 
 
 class DQNAgent:
@@ -54,11 +54,15 @@ class DQNAgent:
     def _build_model(self):
         # set kernel_initializers: https://stackoverflow.com/questions/45230448/how-to-get-reproducible-result-when-running-keras-with-tensorflow-backend
         model = Sequential()
-        model.add(Dense(24, input_dim=self.state_size,
+        model.add(Dense(self.state_size, input_dim=self.state_size,
                         activation='relu',
                         kernel_initializer=initializers.glorot_normal(seed=1337),
                         bias_initializer=initializers.Constant(value=0)))
-        model.add(Dense(24,
+        model.add(Dense(200,
+                        activation='relu',
+                        kernel_initializer=initializers.glorot_normal(seed=1337),
+                        bias_initializer=initializers.Constant(value=0)))
+        model.add(Dense(200,
                         activation='relu',
                         kernel_initializer=initializers.glorot_normal(seed=1337),
                         bias_initializer=initializers.Constant(value=0)))

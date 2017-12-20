@@ -34,7 +34,7 @@ def detectCollision(traci_data, veh_travelled_distance):
 
 def run():
     traci.vehicle.subscribe(VEH_ID, [VAR_SPEED, VAR_POSITION, VAR_DISTANCE])
-    traci.vehicle.subscribe('0', [VAR_SPEED, VAR_POSITION])
+    # traci.vehicle.subscribe('0', [VAR_SPEED, VAR_POSITION])
 
     traci_data = traci.vehicle.getSubscriptionResults()
     traci.simulationStep()
@@ -47,8 +47,8 @@ def run():
         collision = detectCollision(traci_data, pos)
 
         if VEH_ID in traci.vehicle.getIDList():
-            traci.vehicle.setSpeedMode('0', 0)
-            traci.vehicle.setSpeedMode(VEH_ID, 0)    # disable all safety checks
+            # traci.vehicle.setSpeedMode('0', 0)
+            # traci.vehicle.setSpeedMode(VEH_ID, 0)    # disable all safety checks
             print(traci.vehicle.getSpeed(VEH_ID))
 
         # to create a collision:

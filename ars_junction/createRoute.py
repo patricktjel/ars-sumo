@@ -29,7 +29,7 @@ def generate_routefile(file_location="data/junction.rou.xml"):
 
     vtype = VehicleType.VehicleType("self_car")
     route = rn.choice(['4to2', '4to3', '4to5'])
-    vehicle = Vehicle.Vehicle(VEH_ID, route=route, color="1,0,0")
+    vehicle = Vehicle.Vehicle(VEH_ID, route='4to2', color="1,0,0")
 
     with open(file_location, "w") as route_file:
         print("""<routes>
@@ -46,8 +46,8 @@ def generate_routefile(file_location="data/junction.rou.xml"):
         """, file=route_file)
 
         route = rn.choice(['5to3', '3to5'])
-        depart_time = float(rn.randint(0, 5))
-        for i in range(1, rn.randint(1, 11)):
+        depart_time = float(rn.randint(0, 15))/10
+        for i in range(1, rn.randint(2, 12)):
             vehicle = Vehicle.Vehicle(i, route=route, depart=depart_time)
             depart_time += 0.1
             print(vehicle.printXML(), file=route_file)

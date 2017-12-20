@@ -37,7 +37,7 @@ sumoBinary = checkBinary('sumo-gui') if gui else checkBinary('sumo')
 config_path = "../data/{}.sumocfg".format(PREFIX)
 
 
-# The 490 is a magic variable which should  be changed when the road get's longer.
+# The 90 is a magic variable which should  be changed when the road get's longer.
 def detectCollision(traci_data, veh_travelled_distance):
     return VEH_ID not in traci_data and veh_travelled_distance <= 90
 
@@ -50,6 +50,8 @@ def getReward(traci_data):
     speed = traci_data[VEH_ID][VAR_SPEED]
     reward = speedReward(speed)
     reward *= 10/speedReward(MAX_LANE_SPEED)
+    # minus the time it costs
+    reward -= traci.simulation.getCurrentTime()/10000
     return reward
 
 
@@ -60,12 +62,16 @@ class SumoEnv(gym.Env):
         self.maxSpeed = 20
         self.minSpeed = 0
 
-        high = np.array([
-            self.maxSpeed
-        ])
-        low = np.array([
-            self.minSpeed
-        ])
+        high = np.append([
+                self.maxSpeed
+            ],
+            np.ones(shape=(11, 11))
+        )
+        low = np.append([
+                self.minSpeed
+            ],
+            np.zeros(shape=(11, 11))
+        )
 
         # Observation space of the environment
         self.observation_space = spaces.Box(low, high)
@@ -96,7 +102,19 @@ class SumoEnv(gym.Env):
 
     # Sets the state to the currently known values
     def set_state(self):
-        self.state = [self.traci_data[VEH_ID][VAR_SPEED]]
+        speed = self.traci_data[VEH_ID][VAR_SPEED]
+
+        position_grid = np.zeros(shape=(11, 11))
+        car_position = self.traci_data[VEH_ID][VAR_POSITION]
+        for x, y in [x[VAR_POSITION] for x in self.traci_data.values()]:
+            relative_x = x - car_position[0]
+            relative_y = y - car_position[1]
+            x_index = 5 + int(relative_x/5)
+            y_index = 5 + int(relative_y/5)
+            if -5 <= x_index <= 5 and -5 <= y_index <= 5:
+                position_grid[x_index][y_index] = 1
+
+        self.state = np.reshape(np.append([speed], position_grid), (1, self.observation_space.shape[0]))
 
     def _step(self, action):
         self.subscribe_vehicles()
@@ -114,6 +132,7 @@ class SumoEnv(gym.Env):
 
         if detectCollision(self.traci_data, pos):
             print("collision detected")
+            return np.array(self.state), -10000, True, {}
 
         # Check the result of this step and assign a reward
         if VEH_ID in self.traci_data:
@@ -148,7 +167,7 @@ class SumoEnv(gym.Env):
         self.next_id_to_subscribe = 1
 
         self.set_state()
-        return np.array(self.state)
+        return self.state
 
     def close(self):
         traci.close()
