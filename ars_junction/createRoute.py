@@ -41,17 +41,27 @@ def generate_routefile(file_location="data/junction.rou.xml"):
         
         <route id="5to3" edges="5to1 1to3" />
         <route id="3to5" edges="3to1 1to5" />
+        
+        <flow id="up" color="1,1,0"  begin="0" end= "200" probability="1" type="self_car">
+            <route edges="5to1 1to3"/>
+        </flow>
+        <flow id="down" color="1,1,0"  begin="0" end= "200" probability="0.25" type="self_car">
+            <route edges="3to1 1to5"/>
+        </flow>
         """, vehicle.printXML(), """
     
         """, file=route_file)
 
-        route = rn.choice(['5to3', '3to5'])
-        depart_time = float(rn.randint(0, 15))/10
-        for i in range(1, rn.randint(2, 12)):
-            vehicle = Vehicle.Vehicle(i, route=route, depart=depart_time)
-            depart_time += 0.1
-            print(vehicle.printXML(), file=route_file)
-            created_cars.append(str(i))
+        """"
+        Route generation without flows
+        """
+        # route = rn.choice(['5to3', '3to5'])
+        # depart_time = float(rn.randint(0, 15))/10
+        # for i in range(1, rn.randint(2, 12)):
+        #     vehicle = Vehicle.Vehicle(i, route=route, depart=depart_time)
+        #     depart_time += 0.1
+        #     print(vehicle.printXML(), file=route_file)
+        #     created_cars.append(str(i))
 
         print("</routes>", file=route_file)
     return created_cars

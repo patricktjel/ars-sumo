@@ -80,23 +80,16 @@ class SumoEnv(gym.Env):
         self.run = []
         self.test = False
 
+        self.config_path = "../data/{}.sumocfg".format(PREFIX)
+
         # This variable automatically get's updated after traci.simulationStep()
         # self.traci_data
 
-        self.config_path = "../data/{}.sumocfg".format(PREFIX)
-
     # check if it is possible to subscribe the next vehicle
     def subscribe_vehicles(self):
-        # is the next id legit?
-        if self.next_id_to_subscribe < len(self.created_cars):
-            prev_car = self.created_cars[self.next_id_to_subscribe - 1]
-            # check if the previous car is already in the simulation so that SUMO has read car 'next_id_to_subscribe
-            if prev_car in self.traci_data and self.traci_data[prev_car][VAR_POSITION] > (0, 0):
-                try:
-                    traci.vehicle.subscribe(str(self.next_id_to_subscribe), [VAR_SPEED, VAR_DISTANCE, VAR_POSITION])
-                    self.next_id_to_subscribe += 1
-                except Exception:
-                    pass
+        for veh in traci.vehicle.getIDList():
+            if veh not in self.traci_data.keys():
+                traci.vehicle.subscribe(veh, [VAR_SPEED, VAR_DISTANCE, VAR_POSITION, VAR_ANGLE])
 
     # Sets the state to the currently known values
     def set_state(self):
@@ -104,9 +97,9 @@ class SumoEnv(gym.Env):
 
         position_grid = np.zeros(shape=(11, 11))
         car_position = self.traci_data[VEH_ID][VAR_POSITION]
-        for x, y in [x[VAR_POSITION] for x in self.traci_data.values()]:
-            relative_x = x - car_position[0]
-            relative_y = y - car_position[1]
+        for pos in [x[VAR_POSITION] for x in self.traci_data.values()]:
+            relative_x = pos[0] - car_position[0]
+            relative_y = pos[1] - car_position[1]
             x_index = 5 + int(relative_x/5)
             y_index = 5 + int(relative_y/5)
             if -5 <= x_index <= 5 and -5 <= y_index <= 5:
@@ -150,9 +143,6 @@ class SumoEnv(gym.Env):
             self.result.append(list(self.run))
             self.run.clear()
 
-        # generate new traffic situation
-        self.created_cars = createRoute.generate_routefile('../data/junction.rou.xml')
-
         traci.load(["-c", self.config_path])
         traci.simulationStep()
 
@@ -161,15 +151,14 @@ class SumoEnv(gym.Env):
         traci.vehicle.setSpeed(VEH_ID, rn.randint(1, 8))
 
         traci.simulationStep()
-        traci.vehicle.subscribe(VEH_ID, [VAR_SPEED, VAR_DISTANCE, VAR_POSITION])
-        self.next_id_to_subscribe = 1
+        traci.vehicle.subscribe(VEH_ID, [VAR_SPEED, VAR_DISTANCE, VAR_POSITION, VAR_ANGLE])
 
         self.set_state()
         return self.state
 
     def start(self, gui=False):
         sumoBinary = checkBinary('sumo-gui') if gui else checkBinary('sumo')
-        traci.start([sumoBinary, "-n", "../data/{}.net.xml".format(PREFIX)])
+        traci.start([sumoBinary, "-c", self.config_path])
         self.traci_data = traci.vehicle.getSubscriptionResults()
 
     def close(self):

@@ -28,4 +28,8 @@
         <start value="true" />
     </gui_only>
 
+    <random_numberType>
+        <random value="true" />
+    </random_numberType>
+
 </configuration>
