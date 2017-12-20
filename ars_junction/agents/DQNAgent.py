@@ -31,7 +31,7 @@ File is based on the tutorial of
 """
 
 # constant values
-TRAIN_EPISODES  = 10000
+TRAIN_EPISODES  = 100
 TEST_EPISODES   = 5
 MEMORY_SIZE     = 2000
 BATCH_SIZE      = 32
@@ -150,10 +150,13 @@ if __name__ == "__main__":
 
     env.log = False
     env.test = False
+    env.start(gui=True)
     trainOrTest(BATCH_SIZE, episodes=TRAIN_EPISODES, training=True)
+    env.close()
 
     env.log = True
     env.test = True
+    env.start(gui=True)
     trainOrTest(BATCH_SIZE, episodes=TEST_EPISODES, training=False)
 
     plotResults()

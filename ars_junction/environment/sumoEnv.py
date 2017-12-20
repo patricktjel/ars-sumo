@@ -32,10 +32,6 @@ os.environ['PYTHONHASHSEED'] = '0'
 np.random.seed(42)
 rn.seed(12345)
 
-gui = False
-sumoBinary = checkBinary('sumo-gui') if gui else checkBinary('sumo')
-config_path = "../data/{}.sumocfg".format(PREFIX)
-
 
 # The 90 is a magic variable which should  be changed when the road get's longer.
 def detectCollision(traci_data, veh_travelled_distance):
@@ -85,7 +81,9 @@ class SumoEnv(gym.Env):
         self.test = False
 
         # This variable automatically get's updated after traci.simulationStep()
-        self.traci_data = traci.vehicle.getSubscriptionResults()
+        # self.traci_data
+
+        self.config_path = "../data/{}.sumocfg".format(PREFIX)
 
     # check if it is possible to subscribe the next vehicle
     def subscribe_vehicles(self):
@@ -155,7 +153,7 @@ class SumoEnv(gym.Env):
         # generate new traffic situation
         self.created_cars = createRoute.generate_routefile('../data/junction.rou.xml')
 
-        traci.load(["-c", config_path])
+        traci.load(["-c", self.config_path])
         traci.simulationStep()
 
         # Setup environment
@@ -169,8 +167,10 @@ class SumoEnv(gym.Env):
         self.set_state()
         return self.state
 
+    def start(self, gui=False):
+        sumoBinary = checkBinary('sumo-gui') if gui else checkBinary('sumo')
+        traci.start([sumoBinary, "-n", "../data/{}.net.xml".format(PREFIX)])
+        self.traci_data = traci.vehicle.getSubscriptionResults()
+
     def close(self):
         traci.close()
-
-
-traci.start([sumoBinary, "-n", "../data/{}.net.xml".format(PREFIX)])
