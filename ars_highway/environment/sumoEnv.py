@@ -88,7 +88,8 @@ class SumoEnv(gym.Env):
         if VEH_ID in traci_data:
             speed = traci_data[VEH_ID][VAR_SPEED]
             distance = traci_data[VEH_ID][VAR_LEADER][1]
-            reward = 0.0000001*(-1*(1 / (MAX_LANE_SPEED / (6 / 7))) * speed ** 7 + speed ** 6)
+
+            reward = self.getReward(speed)
 
             self.state = (speed, distance)
 
@@ -98,6 +99,20 @@ class SumoEnv(gym.Env):
                 self.run.append(traci_data[VEH_ID][VAR_SPEED])
             return np.array(self.state), reward, False, {}
         return np.array(self.state), -20000, True, {}
+
+    def getReward(self, speed):
+        reward = 0
+        factor = 10/self.getSpeedReward(MAX_LANE_SPEED)
+        reward += factor*self.getSpeedReward(speed)
+        return reward
+
+    def getSpeedReward(self, speed):
+        return -1 * (1 / (MAX_LANE_SPEED / (6 / 7))) * speed ** 7 + speed ** 6
+
+    def getDistanceReward(self, distance, speed):
+        if distance < speed:
+            return (1/3)*(speed/distance)
+        return 0
 
     def _reset(self):
         if self.test and len(self.run) != 0:
