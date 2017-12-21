@@ -46,8 +46,6 @@ def getReward(traci_data):
     speed = traci_data[VEH_ID][VAR_SPEED]
     reward = speedReward(speed)
     reward *= 10/speedReward(MAX_LANE_SPEED)
-    # minus the time it costs
-    reward -= traci.simulation.getCurrentTime()/10000
     return reward
 
 
@@ -156,7 +154,8 @@ class SumoEnv(gym.Env):
         traci.vehicle.setSpeedMode(VEH_ID, 0)
         traci.vehicle.setSpeed(VEH_ID, rn.randint(1, 8))
 
-        traci.simulationStep()
+        # Go to the simulation step where our autonomous car get's in action
+        traci.simulationStep(DEPART_TIME*1000 + 100)
         traci.vehicle.subscribe(VEH_ID, [VAR_SPEED, VAR_DISTANCE, VAR_POSITION, VAR_ANGLE])
 
         self.set_state()
