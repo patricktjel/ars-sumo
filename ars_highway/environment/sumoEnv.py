@@ -71,6 +71,8 @@ class SumoEnv(gym.Env):
         self.run = []
         self.test = False
 
+        self.config_path = "../data/{}.sumocfg".format(PREFIX)
+
     def _step(self, action):
         traci_data = traci.vehicle.getSubscriptionResults()
         if VEH_ID in traci_data:
@@ -102,9 +104,8 @@ class SumoEnv(gym.Env):
             self.result.append(list(self.run))
             self.run.clear()
 
-        traci.load(["-c", config_path])
-        for _ in range(21):
-            traci.simulationStep()
+        traci.load(["-c", self.config_path])
+        traci.simulationStep(21 * 100)
 
         # Setup environment
         speed = rn.randint(10, 20)
@@ -119,8 +120,10 @@ class SumoEnv(gym.Env):
         self.state = (speed, 1000)
         return np.array(self.state)
 
+    def start(self, gui=False):
+        sumoBinary = checkBinary('sumo-gui') if gui else checkBinary('sumo')
+        traci.start([sumoBinary, "-n", "../data/{}.net.xml".format(PREFIX)])
+        self.traci_data = traci.vehicle.getSubscriptionResults()
+
     def close(self):
         traci.close()
-
-
-traci.start([sumoBinary, "-c", config_path])

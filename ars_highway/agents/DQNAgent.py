@@ -144,10 +144,13 @@ if __name__ == "__main__":
 
     env.log = False
     env.test = False
+    env.start(gui=False)
     trainOrTest(BATCH_SIZE, EPISODES, training=True)
+    env.close()
 
     env.log = True
     env.test = True
+    env.start(gui=True)
     trainOrTest(BATCH_SIZE, episodes=5, training=False)
 
     plotResults()

@@ -22,7 +22,6 @@ import os
 import sys
 
 PREFIX = "highway"
-TIME_STEPS = 50
 VEH_ID = 'AUTO'
 MAX_LANE_SPEED = 30
 
