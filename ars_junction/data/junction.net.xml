@@ -80,7 +80,7 @@
         <lane id="5to1_0" index="0" speed="10.00" length="45.25" shape="51.65,0.00 51.65,45.25"/>
     </edge>
 
-    <junction id="1" type="right_before_left" x="50.00" y="50.00" incLanes="3to1_0 2to1_0 5to1_0 4to1_0" intLanes=":1_0_0 :1_1_0 :1_2_0 :1_3_0" shape="46.75,54.75 53.25,54.75 54.75,53.25 54.75,46.75 53.25,45.25 46.75,45.25 45.25,46.75 45.25,53.25">
+    <junction id="1" type="right_before_left" keepClear="False" x="50.00" y="50.00" incLanes="3to1_0 2to1_0 5to1_0 4to1_0" intLanes=":1_0_0 :1_1_0 :1_2_0 :1_3_0" shape="46.75,54.75 53.25,54.75 54.75,53.25 54.75,46.75 53.25,45.25 46.75,45.25 45.25,46.75 45.25,53.25">
         <request index="0" response="1000" foes="1010" cont="0"/>
         <request index="1" response="0001" foes="0101" cont="0"/>
         <request index="2" response="0010" foes="1010" cont="0"/>

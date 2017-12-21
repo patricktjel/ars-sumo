@@ -88,6 +88,7 @@ class SumoEnv(gym.Env):
         for veh in traci.vehicle.getIDList():
             if veh not in self.traci_data.keys():
                 traci.vehicle.subscribe(veh, [VAR_SPEED, VAR_DISTANCE, VAR_POSITION, VAR_ANGLE])
+                traci.vehicle.setSpeedMode(veh, 23)
 
     # Sets the state to the currently known values
     def set_state(self):

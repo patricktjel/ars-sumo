@@ -79,6 +79,9 @@ class VehicleType:
         self.guiShape = GuiShape.PASSENGER
         self.impatience = 0.0
         self.speedFactor = 1.0
+        self.jmIgnoreKeepClearTime = 0
+        self.jmTimegapMinor = 0
+        self.jmCrossingGap = 0
 
     def printXML(obj):
         xmlString = "<vType"
