@@ -125,6 +125,7 @@ class SumoEnv(gym.Env):
 
         # Run a step of the simulation
         traci.simulationStep()
+        self.set_state()
 
         if detectCollision(self.traci_data, pos):
             print("collision detected")
@@ -133,8 +134,6 @@ class SumoEnv(gym.Env):
         # Check the result of this step and assign a reward
         if VEH_ID in self.traci_data:
             reward = getReward(self.traci_data)
-
-            self.set_state()
 
             if self.log:
                 print("{:.2f} {:d} {:.2f}".format(self.traci_data[VEH_ID][VAR_SPEED], action, reward))

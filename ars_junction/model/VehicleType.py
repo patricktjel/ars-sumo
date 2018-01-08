@@ -77,7 +77,7 @@ class VehicleType:
         self.maxSpeed = 15.0
         self.vClass = VClass.PASSENGER
         self.guiShape = GuiShape.PASSENGER
-        self.impatience = 0.0
+        self.impatience = 1.0
         self.speedFactor = 1.0
         self.jmIgnoreKeepClearTime = 0
         self.jmTimegapMinor = 0
