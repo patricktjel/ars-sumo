@@ -59,12 +59,12 @@ class SumoEnv(gym.Env):
         high = np.append([
                 self.maxSpeed
             ],
-            np.ones(shape=(5, 3))
+            np.ones(shape=(13, 6))
         )
         low = np.append([
                 self.minSpeed
             ],
-            np.zeros(shape=(5, 3))
+            np.zeros(shape=(13, 6))
         )
 
         # Observation space of the environment
@@ -95,17 +95,20 @@ class SumoEnv(gym.Env):
     def set_state(self):
         speed = self.traci_data[VEH_ID][VAR_SPEED]
 
-        position_grid = np.zeros(shape=(5, 3))
+        position_grid = np.zeros(shape=(13, 6))
         car_position = self.traci_data[VEH_ID][VAR_POSITION]
-        for pos, angle in [(x[VAR_POSITION], x[VAR_ANGLE]) for x in self.traci_data.values()]:
+
+        # filter out VEH_ID
+        data = [self.traci_data[a] for a in self.traci_data if a != VEH_ID]
+        for pos, angle in [(x[VAR_POSITION], x[VAR_ANGLE]) for x in data]:
             relative_x = pos[0] - car_position[0]
             relative_y = pos[1] - car_position[1]
-            x_index = -1 + int(relative_x/5)
-            y_index = 2 - int(relative_y/5)
+            x_index = int(relative_x/5)
+            y_index = 6 - int(relative_y/5)
 
             # Make sure that the index doesn't go out of bounds
-            if 0 <= x_index <= 2 and 0 <= y_index <= 4:
-                if (angle == 180 and y_index > 2) or (angle == 0 and y_index < 2):
+            if 0 <= x_index <= 5 and 0 <= y_index <= 12:
+                if (angle == 180 and y_index > 6) or (angle == 0 and y_index < 6):
                     # Filter out the cars that have passed the junction.
                     pass
                 else:
