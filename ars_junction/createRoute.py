@@ -27,13 +27,17 @@ except ImportError:
 def generate_routefile(file_location="data/junction.rou.xml"):
     created_cars = [VEH_ID]
 
-    vtype = VehicleType.VehicleType("self_car")
+    vtype_left = VehicleType.VehicleType("right_car")
+    vtype_right = VehicleType.VehicleType("left_car")
+    vtype_right.impatience = 1.0
+    vtype_right.jmIgnoreFoeProb = 1.0
     route = rn.choice(['4to2', '4to3', '4to5'])
     vehicle = Vehicle.Vehicle(VEH_ID, depart=DEPART_TIME, route='4to2', color="1,0,0")
 
     with open(file_location, "w") as route_file:
         print("""<routes>
-        """, vtype.printXML(), """"
+        """, vtype_left.printXML(), """"
+        """, vtype_right.printXML(), """"
         
         <route id="4to2" edges="4to1 1to2" />
         <route id="4to3" edges="4to1 1to3" />
@@ -42,10 +46,10 @@ def generate_routefile(file_location="data/junction.rou.xml"):
         <route id="5to3" edges="5to1 1to3" />
         <route id="3to5" edges="3to1 1to5" />
         
-        <flow id="up" color="1,1,0"  begin="0" end= "200" probability="0.1" type="self_car">
+        <flow id="up" color="1,1,0"  begin="0" end= "200" probability="0.15" type="right_car">
             <route edges="5to1 1to3"/>
         </flow>
-        <flow id="down" color="1,1,0"  begin="0" end= "200" probability="0.1" type="self_car">
+        <flow id="down" color="1,1,0"  begin="0" end= "200" probability="0.15" type="left_car">
             <route edges="3to1 1to5"/>
         </flow>
         """, vehicle.printXML(), """

@@ -7,6 +7,8 @@
         <route-files value="junction.rou.xml"/>
     </input>
 
+    <gui-settings-file value="gui-settings.cfg" />
+
     <time>
         <begin value="0"/>
         <end value="36050000"/>

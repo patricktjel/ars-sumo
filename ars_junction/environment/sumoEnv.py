@@ -59,17 +59,17 @@ class SumoEnv(gym.Env):
         high = np.append([
                 self.maxSpeed
             ],
-            np.ones(shape=(11, 11))
+            np.ones(shape=(5, 3))
         )
         low = np.append([
                 self.minSpeed
             ],
-            np.zeros(shape=(11, 11))
+            np.zeros(shape=(5, 3))
         )
 
         # Observation space of the environment
         self.observation_space = spaces.Box(low, high)
-        self.action_space = spaces.Discrete(3)
+        self.action_space = spaces.Discrete(5)
 
         self.viewer = None
         self.state = None
@@ -88,23 +88,24 @@ class SumoEnv(gym.Env):
         for veh in traci.vehicle.getIDList():
             if veh not in self.traci_data.keys():
                 traci.vehicle.subscribe(veh, [VAR_SPEED, VAR_DISTANCE, VAR_POSITION, VAR_ANGLE])
-                traci.vehicle.setSpeedMode(veh, 23)
+                if "up" in veh:
+                    traci.vehicle.setSpeedMode(veh, 23)
 
     # Sets the state to the currently known values
     def set_state(self):
         speed = self.traci_data[VEH_ID][VAR_SPEED]
 
-        position_grid = np.zeros(shape=(11, 11))
+        position_grid = np.zeros(shape=(5, 3))
         car_position = self.traci_data[VEH_ID][VAR_POSITION]
         for pos, angle in [(x[VAR_POSITION], x[VAR_ANGLE]) for x in self.traci_data.values()]:
             relative_x = pos[0] - car_position[0]
             relative_y = pos[1] - car_position[1]
-            x_index = 5 + int(relative_x/5)
-            y_index = 5 - int(relative_y/5)
+            x_index = -1 + int(relative_x/5)
+            y_index = 2 - int(relative_y/5)
 
             # Make sure that the index doesn't go out of bounds
-            if 0 <= x_index <= 10 and 0 <= y_index <= 10:
-                if (angle == 180 and y_index > 5) or (angle == 0 and y_index < 5):
+            if 0 <= x_index <= 2 and 0 <= y_index <= 4:
+                if (angle == 180 and y_index > 2) or (angle == 0 and y_index < 2):
                     # Filter out the cars that have passed the junction.
                     pass
                 else:
@@ -119,21 +120,28 @@ class SumoEnv(gym.Env):
         if VEH_ID in self.traci_data:
             # apply the given action
             if action == 0:
-                traci.vehicle.setSpeed(VEH_ID, self.traci_data[VEH_ID][VAR_SPEED] + 0.25)
+                traci.vehicle.setSpeed(VEH_ID, self.traci_data[VEH_ID][VAR_SPEED] + 0.082)
             if action == 2:
-                traci.vehicle.setSpeed(VEH_ID, self.traci_data[VEH_ID][VAR_SPEED] - 0.25)
+                traci.vehicle.setSpeed(VEH_ID, self.traci_data[VEH_ID][VAR_SPEED] - 0.372)
+            if action == 3:
+                traci.vehicle.setSpeed(VEH_ID, self.traci_data[VEH_ID][VAR_SPEED] + 0.287)
+            if action == 4:
+                traci.vehicle.setSpeed(VEH_ID, self.traci_data[VEH_ID][VAR_SPEED] - 0.5)
 
         # Run a step of the simulation
         traci.simulationStep()
-        self.set_state()
 
         if detectCollision(self.traci_data, pos):
             print("collision detected")
-            return np.array(self.state), -10000, True, {}
+            return np.array(self.state), - 1000, True, {}
 
         # Check the result of this step and assign a reward
         if VEH_ID in self.traci_data:
             reward = getReward(self.traci_data)
+            self.set_state()
+
+            # if 1 in self.state.position_grid:
+            #     print("Test")
 
             if self.log:
                 print("{:.2f} {:d} {:.2f}".format(self.traci_data[VEH_ID][VAR_SPEED], action, reward))

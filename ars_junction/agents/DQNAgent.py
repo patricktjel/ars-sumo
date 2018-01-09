@@ -31,7 +31,7 @@ File is based on the tutorial of
 """
 
 # constant values
-TRAIN_EPISODES  = 10000
+TRAIN_EPISODES  = 35000
 TEST_EPISODES   = 100
 MEMORY_SIZE     = 2000
 BATCH_SIZE      = 32
