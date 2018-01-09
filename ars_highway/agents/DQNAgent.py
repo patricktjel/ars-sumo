@@ -41,7 +41,7 @@ class DQNAgent:
         self.state_size = state_size
         self.action_size = action_size
         self.memory = deque(maxlen=2000)
-        self.gamma = 0.8  # discount rate
+        self.gamma = 0.9  # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.999
@@ -132,7 +132,7 @@ def plotResults():
 
     plt.legend(leg, loc='upper left')
     plt.xlabel('Time (0.1s/step)')
-    plt.ylabel('Speed (m/s)')
+    plt.ylabel('Distance (m)')
     plt.show()
 
 

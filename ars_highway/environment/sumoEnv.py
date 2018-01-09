@@ -49,7 +49,7 @@ class SumoEnv(gym.Env):
         self.maxSpeed = 20
         self.minSpeed = 0
 
-        self.minDistance = 0
+        self.minDistance = -1
         self.maxDistance = 500
         high = np.array([
             self.maxSpeed,
@@ -57,7 +57,7 @@ class SumoEnv(gym.Env):
         ])
         low = np.array([
             self.minSpeed,
-            self.maxDistance
+            self.minDistance
         ])
 
         # Observation space of the environment
@@ -75,6 +75,17 @@ class SumoEnv(gym.Env):
 
     def _step(self, action):
         traci_data = traci.vehicle.getSubscriptionResults()
+
+        # 2 percent chance to randomly change the speed of the lead car
+        if np.random.rand() <= 0.02:
+            rand = np.random.rand() * 3
+            if rand <= 1:
+                traci.vehicle.setType("car1", "slow_car")
+            elif rand <= 2:
+                traci.vehicle.setType("car1", "car")
+            else:
+                traci.vehicle.setType("car1", "fast_car")
+
         if VEH_ID in traci_data:
             # apply the given action
             if action == 0:
@@ -89,29 +100,35 @@ class SumoEnv(gym.Env):
             speed = traci_data[VEH_ID][VAR_SPEED]
             distance = traci_data[VEH_ID][VAR_LEADER][1]
 
-            reward = self.getReward(speed)
+            reward = self.getReward(speed, distance)
 
             self.state = (speed, distance)
 
             if self.log:
                 print("%.2f %d %.2f" % (traci_data[VEH_ID][VAR_SPEED], action, reward))
             if self.test:
-                self.run.append(traci_data[VEH_ID][VAR_SPEED])
+                self.run.append(distance)
             return np.array(self.state), reward, False, {}
         return np.array(self.state), -20000, True, {}
 
-    def getReward(self, speed):
+    def getReward(self, speed, distance):
         reward = 0
         factor = 10/self.getSpeedReward(MAX_LANE_SPEED)
         reward += factor*self.getSpeedReward(speed)
+        reward += self.getDistanceReward(speed, distance)
         return reward
 
+    # Give a low reward for low speeds, high reward for driving the maximum speed
+    # and a negative reward for going too fast
     def getSpeedReward(self, speed):
         return -1 * (1 / (MAX_LANE_SPEED / (6 / 7))) * speed ** 7 + speed ** 6
 
+    # A negative reward for driving too close to the car in front
     def getDistanceReward(self, distance, speed):
-        if distance < speed:
-            return (1/3)*(speed/distance)
+        if distance == 0:
+            return 0
+        if distance*1.5 < speed:
+            return -1/4*(speed/distance)
         return 0
 
     def _reset(self):
