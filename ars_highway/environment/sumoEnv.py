@@ -15,7 +15,7 @@ import sys
 
 # Setting the seeds to get reproducible results
 os.environ['PYTHONHASHSEED'] = '0'
-np.random.seed(43)
+np.random.seed(42)
 rn.seed(12345)
 
 # we need to import python modules from the $SUMO_HOME/tools directory
@@ -59,12 +59,10 @@ class SumoEnv(gym.Env):
         high = np.array([
             self.maxSpeed,
             self.maxDistance,
-            self.maxDeltaVelocity,
         ])
         low = np.array([
             self.minSpeed,
             self.minDistance,
-            self.minDeltaVelocity,
         ])
 
         # Observation space of the environment
@@ -110,7 +108,7 @@ class SumoEnv(gym.Env):
             decel = traci_data["car1"][VAR_APPARENT_DECEL]
             reward = self.getReward(velocity, distance)
 
-            self.state = (velocity, distance, deltaVelocity)
+            self.state = (velocity, distance)
 
             if self.log:
                 print("%.2f %d %.2f" % (traci_data[VEH_ID][VAR_SPEED], action, reward))
@@ -157,7 +155,7 @@ class SumoEnv(gym.Env):
         traci.vehicle.subscribe(VEH_ID, [VAR_SPEED])
         traci.vehicle.subscribe("car1", [VAR_SPEED, VAR_APPARENT_DECEL])
         traci.vehicle.subscribeLeader(VEH_ID, 500)
-        self.state = (speed, 1000, 0)
+        self.state = (speed, 1000)
         return np.array(self.state)
 
     def start(self, gui=False):
