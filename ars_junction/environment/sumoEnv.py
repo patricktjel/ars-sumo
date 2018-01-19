@@ -159,14 +159,16 @@ class SumoEnv(gym.Env):
             self.run.clear()
 
         traci.load(["-c", self.config_path])
-        traci.simulationStep()
+
+        # Go to the simulation step where our autonomous car get's in action
+        for _ in range(DEPART_TIME*10):
+            traci.simulationStep()
 
         # Setup environment
         traci.vehicle.setSpeedMode(VEH_ID, 0)
         traci.vehicle.setSpeed(VEH_ID, rn.randint(1, 8))
+        traci.simulationStep()
 
-        # Go to the simulation step where our autonomous car get's in action
-        traci.simulationStep(DEPART_TIME*1000 + 100)
         traci.vehicle.subscribe(VEH_ID, [VAR_SPEED, VAR_DISTANCE, VAR_POSITION, VAR_ANGLE])
 
         self.set_state()
