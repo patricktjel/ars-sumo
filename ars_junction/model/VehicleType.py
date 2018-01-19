@@ -74,16 +74,20 @@ class VehicleType:
         self.sigma = 0.5
         self.length = 5.0
         self.minGap = 2.5
-        self.maxSpeed = 70.0
+        self.maxSpeed = 15.0
         self.vClass = VClass.PASSENGER
         self.guiShape = GuiShape.PASSENGER
         self.impatience = 0.0
         self.speedFactor = 1.0
+        self.jmIgnoreKeepClearTime = 0
+        self.jmIgnoreFoeProb = 0
+        self.jmTimegapMinor = 0
+        self.jmCrossingGap = 0
 
     def printXML(obj):
         xmlString = "<vType"
         for attr in dir(obj):
             if hasattr(obj, attr) and "_" not in attr and not callable(getattr(obj,attr)):
-                xmlString += (" %s=\"%s\"" % (attr, getattr(obj, attr)))
+                xmlString += (" {}=\"{}\"".format(attr, getattr(obj, attr)))
         xmlString += "/>"
         return xmlString

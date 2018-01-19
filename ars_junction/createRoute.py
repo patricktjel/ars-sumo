@@ -4,9 +4,12 @@ Script to generate the rou.xml file in the data folder.
 """
 from __future__ import absolute_import
 from __future__ import print_function
+import model.VehicleType as VehicleType
+import model.Vehicle as Vehicle
 
-import random
 from constants import *
+import random as rn
+rn.seed(12345)
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 try:
@@ -21,32 +24,51 @@ except ImportError:
 
 
 # method to generate routes file.
-def generate_routefile():
-    with open("data/%s.rou.xml" % PREFIX, "w") as routes:
+def generate_routefile(file_location="data/junction.rou.xml"):
+    created_cars = [VEH_ID]
+
+    vtype_left = VehicleType.VehicleType("right_car")
+    vtype_right = VehicleType.VehicleType("left_car")
+    vtype_right.impatience = 1.0
+    vtype_right.jmIgnoreFoeProb = 1.0
+    route = rn.choice(['4to2', '4to3', '4to5'])
+    vehicle = Vehicle.Vehicle(VEH_ID, depart=DEPART_TIME, route='4to2', color="1,0,0")
+
+    with open(file_location, "w") as route_file:
         print("""<routes>
-        <vType id="car" accel="0.8" decel="4.5" sigma="0.5" length="5" minGap="2.5" maxSpeed="16.67" guiShape="passenger"/>
-
-        <route id="start" edges="4to1" />
-
+        """, vtype_left.printXML(), """"
+        """, vtype_right.printXML(), """"
+        
         <route id="4to2" edges="4to1 1to2" />
+        <route id="4to3" edges="4to1 1to3" />
+        <route id="4to5" edges="4to1 1to5" />
+        
+        <route id="5to3" edges="5to1 1to3" />
         <route id="3to5" edges="3to1 1to5" />
         
-    <vehicle id="AUTO" type="car" route="4to2" depart="0" color="1,0,0"/>
-        """, file=routes)
+        <flow id="up" color="1,1,0"  begin="0" end= "200" probability="0.15" type="right_car">
+            <route edges="5to1 1to3"/>
+        </flow>
+        <flow id="down" color="1,1,0"  begin="0" end= "200" probability="0.15" type="left_car">
+            <route edges="3to1 1to5"/>
+        </flow>
+        """, vehicle.printXML(), """
+    
+        """, file=route_file)
 
-        vehNr = 0
-        for i in range(TIME_STEPS):
-            # from 4 to 2 cars every step
-            print('    <vehicle id="right_%i" type="car" route="4to2" depart="%i" />' % (
-                vehNr, i), file=routes)
-            vehNr += 1
+        """"
+        Route generation without flows
+        """
+        # route = rn.choice(['5to3', '3to5'])
+        # depart_time = float(rn.randint(0, 15))/10
+        # for i in range(1, rn.randint(2, 12)):
+        #     vehicle = Vehicle.Vehicle(i, route=route, depart=depart_time)
+        #     depart_time += 0.1
+        #     print(vehicle.printXML(), file=route_file)
+        #     created_cars.append(str(i))
 
-            # from 3 to 5 cars every step
-            print('    <vehicle id="down_%i" type="car" route="3to5" depart="%i" />' % (
-                vehNr, i), file=routes)
-            vehNr += 1
-
-        print("</routes>", file=routes)
+        print("</routes>", file=route_file)
+    return created_cars
 
 
 # this is the main entry point of this script

@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+
+from traci.constants import VAR_SPEED, VAR_POSITION, VAR_DISTANCE
 from constants import *
 
 import os
@@ -20,14 +22,33 @@ except ImportError:
         "please declare environment variable 'SUMO_HOME' as the root directory of your sumo installation (it should contain folders 'bin', 'tools' and 'docs')")
 
 import traci
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+# The 490 is a magic variable which should  be changed when the road get's longer.
+def detectCollision(traci_data, veh_travelled_distance):
+    return VEH_ID not in traci_data and veh_travelled_distance <= 490
 
 
 def run():
+    traci.vehicle.subscribe(VEH_ID, [VAR_SPEED, VAR_POSITION, VAR_DISTANCE])
+    # traci.vehicle.subscribe('0', [VAR_SPEED, VAR_POSITION])
+
+    traci_data = traci.vehicle.getSubscriptionResults()
+    traci.simulationStep()
+
     while traci.simulation.getMinExpectedNumber() > 0:
+        pos = traci_data[VEH_ID][VAR_DISTANCE]
         traci.simulationStep()
 
+        # Collision check test
+        collision = detectCollision(traci_data, pos)
+
         if VEH_ID in traci.vehicle.getIDList():
-            traci.vehicle.setSpeedMode(VEH_ID, 0)    # disable all safety checks
+            # traci.vehicle.setSpeedMode('0', 0)
+            # traci.vehicle.setSpeedMode(VEH_ID, 0)    # disable all safety checks
             print(traci.vehicle.getSpeed(VEH_ID))
 
         # to create a collision:
@@ -62,6 +83,5 @@ if __name__ == "__main__":
 
     # this is the normal way of using traci. sumo is started as a
     # subprocess and then the python script connects and runs
-    traci.start([sumoBinary, "-c", "data/%s.sumocfg" % PREFIX,
-                             "--tripinfo-output", "tripinfo.xml"])
+    traci.start([sumoBinary, "-c", "data/{}.sumocfg".format(PREFIX)])
     run()

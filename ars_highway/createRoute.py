@@ -4,7 +4,7 @@ Script to generate the rou.xml file in the data folder.
 """
 from __future__ import absolute_import
 from __future__ import print_function
-import model.VehicleType as VehicleType
+  import model.VehicleType as VehicleType
 import model.Vehicle as Vehicle
 
 import random

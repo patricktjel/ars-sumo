@@ -9,3 +9,8 @@ To run everything run the following command:
 Download graphviz from and install it at: "C:/Program Files (x86)/Graphviz2.38/bin/":
 
     https://graphviz.gitlab.io/_pages/Download/Download_windows.html
+	
+
+## To run:
+First run createRoute.py
+Then DQNAgent.py
