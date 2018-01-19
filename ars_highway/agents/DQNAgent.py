@@ -125,9 +125,9 @@ def trainOrTest(batch_size, episodes, training):
 
 
 def plotResults():
-    res = np.asarray(env.result)
-    np.savetxt("result.csv", res, delimiter=",")
+    # Complete the result, safe the environment
     env.reset()
+
     leg = []
     for i, episode in enumerate(env.result):
         plt.plot(episode)
@@ -138,6 +138,9 @@ def plotResults():
     plt.xlabel('Time (0.1s/step)')
     plt.ylabel('Distance (m)')
     plt.show()
+
+    res = np.asarray(env.result)
+    np.savetxt("result.csv", res, delimiter=",", fmt='%8s')
 
 
 if __name__ == "__main__":
