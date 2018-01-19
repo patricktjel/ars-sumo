@@ -46,18 +46,27 @@ class SumoEnv(gym.Env):
 
     def __init__(self):
         # Speeds in meter per second
-        self.maxSpeed = 20
+        self.maxSpeed = 40
         self.minSpeed = 0
+        self.minDeltaVelocity = -30
+        self.minDecelLead = -5
 
         self.minDistance = -1
         self.maxDistance = 500
+        self.maxDeltaVelocity = 30
+        self.maxDecelLead = 5
+
         high = np.array([
             self.maxSpeed,
             self.maxDistance,
+            self.maxDeltaVelocity,
+            self.maxDecelLead
         ])
         low = np.array([
             self.minSpeed,
-            self.minDistance
+            self.minDistance,
+            self.minDeltaVelocity,
+            self.minDecelLead
         ])
 
         # Observation space of the environment
@@ -97,19 +106,20 @@ class SumoEnv(gym.Env):
 
         # Check the result of this step and assign a reward
         if VEH_ID in traci_data:
-            speed = traci_data[VEH_ID][VAR_SPEED]
+            velocity = traci_data[VEH_ID][VAR_SPEED]
             distance = traci_data[VEH_ID][VAR_LEADER][1]
+            deltaVelocity = traci_data["car1"][VAR_SPEED]
+            decel = traci_data["car1"][VAR_APPARENT_DECEL]
+            reward = self.getReward(velocity, distance)
 
-            reward = self.getReward(speed, distance)
-
-            self.state = (speed, distance)
+            self.state = (velocity, distance, deltaVelocity, decel)
 
             if self.log:
                 print("%.2f %d %.2f" % (traci_data[VEH_ID][VAR_SPEED], action, reward))
             if self.test:
                 self.run.append(distance)
             return np.array(self.state), reward, False, {}
-        return np.array(self.state), -20000, True, {}
+        return np.array(self.state), -10000, True, {}
 
     def getReward(self, speed, distance):
         reward = 0
@@ -125,11 +135,10 @@ class SumoEnv(gym.Env):
 
     # A negative reward for driving too close to the car in front
     def getDistanceReward(self, distance, speed):
-        if distance == 0:
+        if distance <= 0:
             return 0
-        if distance*1.5 < speed:
-            return -1/4*(speed/distance)
-        return 0
+        else:
+            return -1*(speed/distance)
 
     def _reset(self):
         if self.test and len(self.run) != 0:
@@ -140,7 +149,7 @@ class SumoEnv(gym.Env):
         traci.simulationStep(21 * 100)
 
         # Setup environment
-        speed = rn.randint(10, 20)
+        speed = rn.randint(15, 25)
         traci.vehicle.setSpeedMode(VEH_ID, 0)
         traci.vehicle.setSpeed(VEH_ID, speed)
 
@@ -148,8 +157,9 @@ class SumoEnv(gym.Env):
 
         # subscribe the vehicles to get their data.
         traci.vehicle.subscribe(VEH_ID, [VAR_SPEED])
+        traci.vehicle.subscribe("car1", [VAR_SPEED, VAR_APPARENT_DECEL])
         traci.vehicle.subscribeLeader(VEH_ID, 500)
-        self.state = (speed, 1000)
+        self.state = (speed, 1000, 0, 0)
         return np.array(self.state)
 
     def start(self, gui=False):

@@ -22,6 +22,7 @@ from keras.optimizers import Adam
 from keras.utils import plot_model
 from keras import initializers
 
+
 import environment
 import matplotlib.pyplot as plt
 
@@ -32,7 +33,7 @@ File is based on the tutorial of
 
 # constant values
 EPISODES    = 10000
-BATCH_SIZE  = 32
+BATCH_SIZE  = 64
 MAX_STEPS   = 200
 
 
@@ -41,7 +42,7 @@ class DQNAgent:
         self.state_size = state_size
         self.action_size = action_size
         self.memory = deque(maxlen=2000)
-        self.gamma = 0.9  # discount rate
+        self.gamma = 0.95  # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.999
@@ -124,6 +125,8 @@ def trainOrTest(batch_size, episodes, training):
 
 
 def plotResults():
+    res = np.asarray(env.result)
+    np.savetxt("result.csv", res, delimiter=",")
     env.reset()
     leg = []
     for i, episode in enumerate(env.result):
@@ -131,6 +134,7 @@ def plotResults():
         leg.append('episode %d' % (i+1))
 
     plt.legend(leg, loc='upper left')
+    plt.axes().set_ylim(0, 110)
     plt.xlabel('Time (0.1s/step)')
     plt.ylabel('Distance (m)')
     plt.show()
