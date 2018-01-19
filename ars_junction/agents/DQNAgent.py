@@ -131,7 +131,7 @@ def trainOrTest(batch_size, episodes, training):
 
 def plotResults():
     env.reset()
-    np.savetxt('data', np.asarray(env.result))
+    np.save('data', env.result)
     leg = []
     for i, episode in enumerate(env.result):
         plt.plot(episode)
