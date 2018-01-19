@@ -31,7 +31,7 @@ File is based on the tutorial of
 """
 
 # constant values
-TRAIN_EPISODES  = 35000
+TRAIN_EPISODES  = 10000
 TEST_EPISODES   = 100
 MEMORY_SIZE     = 2000
 BATCH_SIZE      = 32
@@ -131,6 +131,7 @@ def trainOrTest(batch_size, episodes, training):
 
 def plotResults():
     env.reset()
+    np.savetxt('data', np.asarray(env.result))
     leg = []
     for i, episode in enumerate(env.result):
         plt.plot(episode)
